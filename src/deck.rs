@@ -27,11 +27,9 @@ impl Deck
     pub fn new(path: &PathBuf) -> Self
     { 
         let path: PathBuf     = path.clone();
-        let deck_name: String = path.into_iter().last()
+        let deck_name: String = path.file_name()
             .unwrap()
             .to_string_lossy()
-            .split(".")
-            .collect::<Vec<&str>>()[0]
             .to_string();
 
         Self {
@@ -67,7 +65,8 @@ impl Deck
         }
         return Ok(());
     }
-    pub fn remove_card(&mut self, front: String, back: String){}
+
+    pub fn remove_card(&mut self, card: Card){}
     pub fn edit_deck(&mut self)
     {
         // let terminal: String = std::env::var("TERM").unwrap_or("xterm".into());
