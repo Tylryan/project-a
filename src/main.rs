@@ -8,7 +8,7 @@ mod commands;
 use cli::cli_parser;
 
 use commands::Commands;
-use std::{env, path::PathBuf};
+use std::env;
 fn main() 
 {
     if env::args().len() > 1 

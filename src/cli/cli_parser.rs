@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-// use crate::commands::Commands;
 use crate::cli;
 
 #[derive(Parser)]
@@ -45,7 +44,7 @@ pub struct Object
 #[derive(Subcommand, Debug)]
 pub enum Objects 
 {
-    // Card(Card),
+    Card(Card),
     Deck(Deck),
 }
 
@@ -66,6 +65,8 @@ pub struct Deck
 pub struct Card 
 {
     pub card_name: String,
+    pub deck_name: String,
+
     pub new_name: Option<String>
 }
 
@@ -78,20 +79,20 @@ impl Cli
         {
             Actions::Add(object) => 
             {
-                cli::commands::add_deck(object)
+                cli::commands::add(object)
             },
             Actions::Remove(object) => 
             {
-                cli::commands::remove_deck(object)
+                cli::commands::remove(object)
             },
             Actions::List(object) =>
             {
                 let decks_path = PathBuf::from("./decks");
-                cli::commands::list_decks(object, &decks_path)
+                cli::commands::list(object, &decks_path)
             },
             Actions::Edit(object) =>
             {
-                cli::commands::edit_deck(object)
+                cli::commands::edit(object)
             }
         }
     }
