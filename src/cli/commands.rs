@@ -1,10 +1,27 @@
+/* cli::commands
+ * Takes CLI info from the user (via cli_parser::Cli) and process it
+ * into a common format.
+ *
+ * E.g. Cli Parser -> CLI Functions -> Common Functions
+ *
+ * This will be helpful in the future as the TUI will use the same commands as 
+ * the CLI. However, new commands will not have to be written, just their 
+ * implementaion.
+ *
+ * USEFUL FILES
+ *  src/cli/cli_parser
+ *      This file defines how the user inputs information
+ *  src/cli/commands 
+ *      This file transforms the user input into a common format.
+ *  src/commands 
+ *      This is a set of common commands that CLI and TUI will share.
+*/
+
 use std::path::PathBuf;
-use std::process::exit;
 
 use crate::commands::Commands;
 use crate::cli::cli_parser::{Object, Objects, ListObject, ListObjects, Deck, Card};
 use crate::deck_reader::Reader;
-
 
 pub fn add(object: &Object) 
 {
@@ -101,6 +118,33 @@ fn edit_deck(deck: &Deck)
     Commands::edit_deck(deck_name)
 }
 
+pub fn rename(object: &Object) 
+{
+    match object.object
+    {
+        Objects::Deck(ref deck) => { rename_deck(deck); },
+        Objects::Card(ref card) => 
+        {
+            let error_msg = "Error: Cannot rename card.
+Hint: edit deck <deck_name>";
+            return eprintln!("{}",error_msg);
+        }
+    }
+
+}
+// exe rename deck <og> <new>
+fn rename_deck(deck: &Deck)
+{
+    let deck_name  = deck.deck_name.clone();
+    let new_name   = deck.new_name.as_ref().unwrap().to_owned();
+    let decks_path = format!("./decks/{deck_name}.deck");
+    if !PathBuf::from(&decks_path).exists() 
+    {
+        return eprintln!("Error: Deck `{deck_name}` not found!");
+    }
+
+    Commands::rename_deck(deck_name, new_name);
+}
 // exe edit card <front> <deck>
 fn edit_card() {todo!()}
 

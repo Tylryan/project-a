@@ -1,3 +1,21 @@
+/* cli::cli_parser 
+ * Used as the CLI interface for all commands.
+ *
+ * E.g. Cli Parser -> CLI Functions -> Common Functions
+ *
+ * This will be helpful in the future as the TUI will use the same commands as 
+ * the CLI. However, new commands will not have to be written, just their 
+ * implementaion.
+ *
+ * USEFUL FILES
+ *  src/cli/cli_parser
+ *      This file defines how the user inputs information
+ *  src/cli/commands 
+ *      This file transforms the user input into a common format.
+ *  src/commands 
+ *      This is a set of common commands that CLI and TUI will share.
+*/
+
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
@@ -18,7 +36,8 @@ pub enum Actions
     Add(Object),
     Remove(Object),
     List(ListObject),
-    Edit(Object)
+    Edit(Object),
+    Rename(Object)
 }
 
 #[derive(Parser, Debug)]
@@ -48,12 +67,9 @@ pub enum Objects
     Deck(Deck),
 }
 
-
 #[derive(Parser, Debug)]
-pub struct Decks 
-{
+pub struct Decks { }
 
-}
 #[derive(Parser, Debug)]
 pub struct Deck 
 {
@@ -64,9 +80,8 @@ pub struct Deck
 #[derive(Parser, Debug)]
 pub struct Card 
 {
-    pub card_name: String,
     pub deck_name: String,
-
+    pub card_name: String,
     pub new_name: Option<String>
 }
 
@@ -93,6 +108,10 @@ impl Cli
             Actions::Edit(object) =>
             {
                 cli::commands::edit(object)
+            },
+            Actions::Rename(object) => 
+            {
+                cli::commands::rename(object)
             }
         }
     }

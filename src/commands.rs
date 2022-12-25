@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use glob::glob;
 
+use crate::deck_reader::Reader;
+
 pub struct Commands { }
 
 impl Commands 
@@ -22,13 +24,14 @@ impl Commands
     { 
         // Eventually will be able to add subdecks
         let config_path = ".";
-        let mut deck_path  = PathBuf::from(format!("{config_path}/decks/{deck_name}.deck"));
+        let deck_path  = PathBuf::from(format!("{config_path}/decks/{deck_name}.deck"));
 
         if deck_path.exists() 
         { 
             std::fs::remove_file(&deck_path).unwrap();
         }
     }
+
     pub fn list_decks(deck_path: &PathBuf) -> Vec<String>
     {
         let mut deck_names: Vec<String> = Vec::new();
@@ -50,6 +53,11 @@ impl Commands
         return deck_names;
     }
 
+    pub fn list_cards(deck_path: &PathBuf) -> Vec<String> 
+    {
+        return Reader::read_to_vec(deck_path).unwrap();
+    }
+
     pub fn edit_deck(deck_name: String) 
     {
         let config_path       = ".";
@@ -62,8 +70,16 @@ impl Commands
             .unwrap()
             .wait().unwrap();
     }
+
+    pub fn rename_deck(deck_name: String, new_name: String) 
+    {
+        let config_path       = ".";
+        let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
+        let new_name: String = format!("{config_path}/decks/{new_name}.deck");
+
+        std::fs::rename(deck_path, new_name).unwrap();
+    }
     pub fn remove_subdeck(deck_name: String) { todo!() }
-    pub fn rename_deck(deck_name: String) { todo!() }
     pub fn rename_subdeck(deck_name: String) { todo!() }
     pub fn add_card(front: String, back: String, deck_name: String) { todo!() }
     pub fn remove_card(front: String, deck_name: String) { todo!() }
