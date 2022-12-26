@@ -1,8 +1,11 @@
-use crate::deck::Deck;
+use serde::{Serialize, Deserialize};
+
+use crate::tui::deck::Deck;
+
+#[derive(Debug,Clone, Serialize, Deserialize)]
 pub struct Decks 
 {
     decks: Vec<Deck>
-
 }
 
 impl Decks 

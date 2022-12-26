@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-use crate::card::Card;
+use crate::tui::card::Card;
 
-pub struct Reader { }
+// When dealing with a deck's contents, use the deck reader.
+pub struct DeckHandler { }
 
-impl Reader 
+impl DeckHandler 
 {
     pub fn read_to_vec(path: &PathBuf) -> Result<Vec<String>, std::io::Error>
     {
@@ -13,16 +14,17 @@ impl Reader
             .split('\n')
             .map(|x| x.to_string())
             .collect();
-        let file_contents = Reader::clean_comments(file_contents);
+        let file_contents = DeckHandler::clean_comments(file_contents);
         
         return Ok(file_contents);
     }
 
-    pub fn add_cli_card(front: &str, back: &str, deck_path: &PathBuf) 
+    // NOTE: This should work for TUI as well
+    pub fn add_card(front: &str, back: &str, deck_path: &PathBuf) 
     {
-        let mut og_cards: Vec<String> = Reader::read_to_vec(&deck_path).unwrap();
+        let mut og_cards: Vec<String> = DeckHandler::read_to_vec(&deck_path).unwrap();
         // If the card already exists in the deck
-        if let Some(_) = Reader::find_index(&front, &og_cards) 
+        if let Some(_) = DeckHandler::find_index(&front, &og_cards) 
         {
             return eprintln!("Error: Card `{}` already in deck!", front);
         }

@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use glob::glob;
 
-use crate::deck_reader::Reader;
+use crate::user::deck_handler::DeckHandler;
 
 pub struct Commands { }
 
@@ -10,7 +10,7 @@ impl Commands
     pub fn add_deck(deck_name: String)    
     { 
         // Eventually will be able to add subdecks
-        let config_path = ".";
+        let config_path = "./test";
         let mut decks_path  = PathBuf::from(format!("{config_path}/decks"));
         if !decks_path.exists() 
         { 
@@ -19,11 +19,10 @@ impl Commands
         decks_path.push(format!("{deck_name}.deck"));
         std::fs::File::create(&decks_path).unwrap();
     }
-    pub fn add_subdeck(decks_names: String) { todo!()}
     pub fn remove_deck(deck_name: String) 
     { 
         // Eventually will be able to add subdecks
-        let config_path = ".";
+        let config_path = "./test";
         let deck_path  = PathBuf::from(format!("{config_path}/decks/{deck_name}.deck"));
 
         if deck_path.exists() 
@@ -55,12 +54,12 @@ impl Commands
 
     pub fn list_cards(deck_path: &PathBuf) -> Vec<String> 
     {
-        return Reader::read_to_vec(deck_path).unwrap();
+        return DeckHandler::read_to_vec(deck_path).unwrap();
     }
 
     pub fn edit_deck(deck_name: String) 
     {
-        let config_path       = ".";
+        let config_path       = "./test";
         let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
         let editor: String    = std::env::var("EDITOR").unwrap();
         let command: String   = format!("{editor} {deck_path}");
@@ -73,12 +72,13 @@ impl Commands
 
     pub fn rename_deck(deck_name: String, new_name: String) 
     {
-        let config_path       = ".";
+        let config_path       = "./test";
         let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
         let new_name: String = format!("{config_path}/decks/{new_name}.deck");
 
         std::fs::rename(deck_path, new_name).unwrap();
     }
+    pub fn add_subdeck(decks_names: String) { todo!()}
     pub fn remove_subdeck(deck_name: String) { todo!() }
     pub fn rename_subdeck(deck_name: String) { todo!() }
     pub fn add_card(front: String, back: String, deck_name: String) { todo!() }

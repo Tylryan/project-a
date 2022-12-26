@@ -1,6 +1,7 @@
 use chrono::{prelude::*, Duration};
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum Difficulty 
 {
     Easy,
@@ -10,7 +11,7 @@ pub enum Difficulty
     None
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum CardStatus 
 {
     Unseen,
@@ -20,7 +21,7 @@ pub enum CardStatus
     Mature,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Card 
 {
     front: String,

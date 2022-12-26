@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
-use crate::card::Card;
-use crate::deck_reader::Reader;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Clone)]
+use crate::tui::card::Card;
+use crate::user::deck_handler::DeckHandler;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Deck 
 {
     name: String,
@@ -44,10 +46,10 @@ impl Deck
 
     pub fn read_from_file(&mut self, path: &PathBuf)
     {
-        let deck_as_vec: Vec<String> = Reader::read_to_vec(path).unwrap();
+        let deck_as_vec: Vec<String> = DeckHandler::read_to_vec(path).unwrap();
         for row in deck_as_vec
         {
-            let new_card: Card = Reader::row_to_card(row);
+            let new_card: Card = DeckHandler::row_to_card(row);
             self.add_card(new_card).unwrap();
         }
     }

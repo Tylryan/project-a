@@ -1,13 +1,10 @@
 mod cli;
-mod deck;
-mod decks;
-mod card;
-mod deck_reader;
-mod commands;
-
+mod common;
+mod tui;
+mod user;
+mod storage;
 use cli::cli_parser;
 
-use commands::Commands;
 use std::env;
 fn main() 
 {
@@ -16,8 +13,8 @@ fn main()
         return cli_parser::Cli::run_clap();
     }
 
-    let deck_name = "new".into();
-    Commands::add_deck(deck_name);
+    // let deck_name = "new".into();
+    // Commands::add_deck(deck_name);
     // let card1 = card::Card::new("Hello".into(), "There".into());
     // let mut card2 = card::Card::new("hi".into(), "There".into());
     // card2.set_difficulty(card::Difficulty::Hard);
