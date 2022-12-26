@@ -28,7 +28,7 @@ pub fn add(object: &Object)
     match object.object
     {
         Objects::Deck(ref deck) => { add_deck(deck) },
-        Objects::Card(ref card) => { add_card(&card.card_name.clone(), &card.deck_name) }
+        Objects::Card(ref card) => { add_card(&card)},
     }
 }
 
@@ -46,8 +46,11 @@ fn add_deck(deck: &Deck)
 }
 
 // exe add card front::back deck_name
-fn add_card(front_back: &str, deck_name: &str) 
+// fn add_card(front_back: &str, deck_name: &str) 
+fn add_card(card: &Card) 
 {
+    let front_back = card.card_name.clone();
+    let deck_name = card.deck_name.clone();
     let deck_path_str = format!("./decks/{deck_name}.deck");
     let deck_path = PathBuf::from(&deck_path_str);
     // check if deck exists
@@ -130,7 +133,6 @@ Hint: edit deck <deck_name>";
             return eprintln!("{}",error_msg);
         }
     }
-
 }
 // exe rename deck <og> <new>
 fn rename_deck(deck: &Deck)

@@ -80,39 +80,25 @@ pub struct Deck
 #[derive(Parser, Debug)]
 pub struct Card 
 {
-    pub deck_name: String,
+    // TODO: Rename these
     pub card_name: String,
-    pub new_name: Option<String>
+    pub deck_name: String,
+    pub new_name: Option<String>,
 }
 
 impl Cli 
 {
     pub fn run_clap() 
     {
+        let decks_path = PathBuf::from("./decks");
         let cli = Cli::parse();
         match &cli.action 
         {
-            Actions::Add(object) => 
-            {
-                cli::commands::add(object)
-            },
-            Actions::Remove(object) => 
-            {
-                cli::commands::remove(object)
-            },
-            Actions::List(object) =>
-            {
-                let decks_path = PathBuf::from("./decks");
-                cli::commands::list(object, &decks_path)
-            },
-            Actions::Edit(object) =>
-            {
-                cli::commands::edit(object)
-            },
-            Actions::Rename(object) => 
-            {
-                cli::commands::rename(object)
-            }
+            Actions::Add(object)    => { cli::commands::add(object)               },
+            Actions::Remove(object) => { cli::commands::remove(object)            },
+            Actions::List(object)   => { cli::commands::list(object, &decks_path) },
+            Actions::Edit(object)   => { cli::commands::edit(object)              },
+            Actions::Rename(object) => { cli::commands::rename(object)            }
         }
     }
 }
