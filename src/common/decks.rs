@@ -15,14 +15,17 @@ impl Decks
     {
         Self { decks: Vec::new(), count: 0 }
     }
-    pub fn add_deck(&mut self, deck: Deck) -> Result<(), String>
+    pub fn add_deck(&mut self, deck: Deck, syncing: bool) -> Result<(), String>
     {
-        // Check if deck exists
-        let deck_exists = self.decks.iter().find(|d| *d == &deck);
-        if deck_exists.is_some() 
+        if !syncing
         {
-            let err_msg = format!("Error: Deck `{}` already exists", deck.get_name());
-            return Err(err_msg);
+            // Check if deck exists
+            let deck_exists = self.decks.iter().find(|d| *d == &deck);
+            if deck_exists.is_some() 
+            {
+                let err_msg = format!("Error: Deck `{}` already exists", deck.get_name());
+                return Err(err_msg);
+            }
         }
 
         self.count +=1;
@@ -39,7 +42,7 @@ impl Decks
             self.remove_deck(deck);
         }
 
-        self.add_deck(deck.to_owned()).unwrap();
+        self.add_deck(deck.to_owned(), false).unwrap();
     }
 
     pub fn remove_deck(&mut self, deck: &Deck) 

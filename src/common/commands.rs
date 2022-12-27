@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use glob::glob;
 
 use crate::storage::db_handler::DbHandler;
 use crate::user::deck_handler::DeckHandler;
@@ -9,64 +8,35 @@ pub struct Commands { }
 
 impl Commands 
 {
+    // Eventually will be able to add subdecks
     pub fn add_deck(deck_name: String)    
     { 
-        // Eventually will be able to add subdecks
         let config_path = "./test";
-        let decks_dir   = PathBuf::from(format!("{config_path}/decks"));
-
-        if !decks_dir.exists() 
-        { 
-            std::fs::create_dir(&decks_dir).unwrap()
-        }
-
         let deck_path   = format!("{config_path}/decks/{deck_name}.deck");
         let deck_buffer = PathBuf::from(format!("{deck_path}"));
         let new_deck    = common::deck::Deck::new(&deck_buffer);
 
-        if deck_buffer.exists()
-        {
-            return eprintln!("Error: Deck `{deck_name}` already exists!");
-        }
-
-        // Create it for the user
-        std::fs::File::create(&deck_buffer).unwrap();
-        // Create it for the database
+        DeckHandler::add_deck(&new_deck, config_path);
         let storage = DbHandler::new(config_path);
         storage.add_deck(&new_deck);
-
     }
+
+    // Eventually will be able to add subdecks
     pub fn remove_deck(deck_name: String) 
     { 
-        // Eventually will be able to add subdecks
         let config_path = "./test";
-        let deck_path  = PathBuf::from(format!("{config_path}/decks/{deck_name}.deck"));
 
-        if deck_path.exists() 
-        { 
-            std::fs::remove_file(&deck_path).unwrap();
-        }
+        DeckHandler::remove_deck(&deck_name, config_path);
+        let mut storage = DbHandler::new(config_path);
+        storage.remove_deck(&deck_name);
     }
 
-    pub fn list_decks(deck_path: &PathBuf) -> Vec<String>
+    // This should probably only list what's in the database
+    pub fn list_decks() -> Vec<String>
     {
-        let mut deck_names: Vec<String> = Vec::new();
-        let deck_path  = deck_path
-            .to_string_lossy()
-            .to_string() + "/*";
+        let config_path = "./test";
 
-        let deck_paths = glob(&deck_path).unwrap();
-
-        for deck in deck_paths
-        {
-            let deck_name = deck.unwrap()
-                .file_stem()
-                .unwrap()
-                .to_string_lossy()
-                .to_string();
-            deck_names.push(deck_name);
-        }
-
+        let deck_names: Vec<String>  = DeckHandler::list_user_decks(config_path);
         return deck_names;
     }
 
@@ -78,50 +48,28 @@ impl Commands
     pub fn edit_deck(deck_name: String) 
     {
         let config_path       = "./test";
-        let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
-        let editor: String    = std::env::var("EDITOR").unwrap();
-        let command: String   = format!("{editor} {deck_path}");
-        std::process::Command::new("bash")
-            .args(["-c", &command])
-            .spawn()
-            .unwrap()
-            .wait().unwrap();
+        DeckHandler::edit_deck(&deck_name, config_path);
+        //TODO somehow sync the edited deck with the database
     }
 
     pub fn rename_deck(deck_name: String, new_name: String) 
     {
         let config_path       = "./test";
-        let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
-        let new_name: String = format!("{config_path}/decks/{new_name}.deck");
-
-        std::fs::rename(deck_path, new_name).unwrap();
+        DeckHandler::rename_deck(&deck_name, &new_name, config_path);
+        let mut storage = DbHandler::new(config_path);
+        storage.rename_deck(&deck_name, &new_name);
     }
-    pub fn add_subdeck(decks_names: String) { todo!()}
-    pub fn remove_subdeck(deck_name: String) { todo!() }
-    pub fn rename_subdeck(deck_name: String) { todo!() }
+
     pub fn add_card(card: &common::card::Card, deck_name: &str) 
     { 
-        let deck_path_str = format!("./test/decks/{deck_name}.deck");
-        let deck_path     = PathBuf::from(&deck_path_str);
         let config_path   = "./test";
-        // check if deck exists
-        if !deck_path.exists() 
-        {
-            return eprintln!("Error: Deck `{deck_name}` not found!");
-        }
-
-        let cards: Vec<String> = DeckHandler::read_to_vec(&deck_path).unwrap();
-        let front              = card.get_front();
-
-        if let Some(_) = DeckHandler::find_index(&front, &cards) 
-        {
-            return eprintln!("Error: Card `{}` already in deck!", front);
-        }
-
-        DeckHandler::add_card(&card, &deck_path);
-        let storage = DbHandler::new(config_path);
+        DeckHandler::add_card(&card, &deck_name, config_path);
+        let mut storage = DbHandler::new(config_path);
         storage.add_card(&card, &deck_name);
     }
     pub fn remove_card(front: String, deck_name: String) { todo!() }
     pub fn rename_card(front: String) { todo!() }
+    pub fn add_subdeck(decks_names: String) { todo!()}
+    pub fn remove_subdeck(deck_name: String) { todo!() }
+    pub fn rename_subdeck(deck_name: String) { todo!() }
 }

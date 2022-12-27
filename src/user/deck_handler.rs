@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use glob::glob;
 
-use crate::common::{card::Card, self};
+use crate::common;
 
 // When dealing with a deck's contents, use the deck reader.
 pub struct DeckHandler { }
@@ -23,8 +23,23 @@ impl DeckHandler
     }
 
     // NOTE: This should work for TUI as well
-    pub fn add_card(card: &common::card::Card, deck_path: &PathBuf) 
+    pub fn add_card(card: &common::card::Card, deck_name: &str, config_path: &str) 
     {
+        let deck_path_str = format!("./test/decks/{deck_name}.deck");
+        let deck_path     = PathBuf::from(&deck_path_str);
+        // check if deck exists
+        if !deck_path.exists() 
+        {
+            return eprintln!("Error: Deck `{deck_name}` not found!");
+        }
+
+        let cards: Vec<String> = DeckHandler::read_to_vec(&deck_path).unwrap();
+        let front              = card.get_front();
+
+        if let Some(_) = DeckHandler::find_index(&front, &cards) 
+        {
+            return eprintln!("Error: Card `{}` already in deck!", front);
+        }
         let front = card.get_front();
         let back  = card.get_back();
 
@@ -51,7 +66,7 @@ impl DeckHandler
 
     }
 
-    pub fn row_to_card(row: String) -> Card 
+    pub fn row_to_card(row: &str) -> common::card::Card 
     {
         let front_back: Vec<String>  = row.split('=')
             .map(|x| x.trim().to_string())
@@ -60,7 +75,7 @@ impl DeckHandler
         let front = front_back[0].clone();
         let back  = front_back[1].clone();
 
-        return Card::new(front,back);
+        return common::card::Card::new(front,back);
     }
     pub fn find_index(front: &str, deck_vec: &Vec<String>) -> Option<usize> 
     {
@@ -101,14 +116,79 @@ impl DeckHandler
 
     pub fn list_user_decks(config_path: &str) -> Vec<String> 
     {
-        let decks_path = format!("{config_path}/decks/*");
-        let decks_list: Vec<String> = glob(&decks_path)
+        let mut deck_names: Vec<String> = Vec::new();
+        let deck_path  = format!("{config_path}/decks/*.deck");
+        let deck_paths = glob(&deck_path).unwrap();
+
+        for deck in deck_paths
+        {
+            let deck_name = deck.unwrap()
+                .file_stem()
+                .unwrap()
+                .to_string_lossy()
+                .to_string();
+            deck_names.push(deck_name);
+        }
+        return deck_names;
+    }
+
+    pub fn remove_deck(deck_name: &str, config_path: &str) 
+    {
+        let deck_path   = PathBuf::from(format!("{config_path}/decks/{deck_name}.deck"));
+
+        if deck_path.exists() 
+        { 
+            std::fs::remove_file(&deck_path).unwrap();
+        }
+        else 
+        {
+            return eprintln!("Error: Deck `{deck_name}` was not found!");
+        }
+    }
+
+    pub fn edit_deck(deck_name: &str, config_path: &str) 
+    {
+        let decks_path = format!(".test/decks/{deck_name}.deck");
+        if !PathBuf::from(&decks_path).exists() 
+        {
+            return eprintln!("Error: Deck `{deck_name}` not found!");
+        }
+        let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
+        let editor: String    = std::env::var("EDITOR").unwrap();
+        let command: String   = format!("{editor} {deck_path}");
+        std::process::Command::new("bash")
+            .args(["-c", &command])
+            .spawn()
             .unwrap()
-            .map(|x| x.unwrap().to_str()
-                 .to_owned()
-                 .unwrap()
-                 .to_string())
-            .collect();
-        return decks_list;
+            .wait().unwrap();
+    }
+    pub fn rename_deck(deck_name: &str, new_name: &str, config_path: &str) 
+    {
+        let deck_path: String = format!("{config_path}/decks/{deck_name}.deck");
+        let new_name: String  = format!("{config_path}/decks/{new_name}.deck");
+
+        std::fs::rename(deck_path, new_name).unwrap();
+
+    }
+
+    pub fn add_deck(deck: &common::deck::Deck, config_path: &str) 
+    {
+        let deck_name = deck.get_name();
+        let decks_dir   = PathBuf::from(format!("{config_path}/decks"));
+
+        if !decks_dir.exists() 
+        { 
+            std::fs::create_dir(&decks_dir).unwrap()
+        }
+
+        let deck_buffer = deck.get_path();
+
+        if deck_buffer.exists()
+        {
+            return eprintln!("Error: Deck `{deck_name}` already exists!");
+        }
+
+        // Create it for the user
+        std::fs::File::create(&deck_buffer).unwrap();
     }
 }

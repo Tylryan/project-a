@@ -1,5 +1,49 @@
-1. move cards,deck,decks to common/
-2. Cli input to actual Card/Deck/Decks structures
-3. Actual structures to json
+Ideas:
+- Audio with ffplay
+- Display image somehow (viu)
+$HOME/config/
+    |
+    decks/
+        |
+        english/
+            |
+            |__ images/
+            |       |__ hello.png
+            |
+            |__ media/
+            |       |___ hello.mp3
+            |
+            |__ english.deck
+add image <*.png> <card_front::deck>
+add audio <*.mp3> <card::deck>
 
 
+                            TUI
+Home Page Keybindings
+    Esc: Normal Mode
+    i/r: Rename selected deck
+    j/k: Down/Up
+    l: Study selected
+    ?: List keys
+    : Run command
+    e: Edit cards of selected deck
+    s: Get stats of selected deck
+        - Total Cards:
+        - Unseen Cards:
+        - Seen cards:
+        - Mature/Learned: Cards
+For each deck on the homescreen, make sure that the number of cards to review and new cards are next to it.
+    
+Deck    N:R
+Russian 5:25
+
+Study Keybindings
+    Esc: Normal Mode
+    i: Insert Mode
+    e: edit deck/card
+    H: home page
+    h: hint +=1
+
+
+Hint system:
+When a user presses 'h' while in normal mode on the study page, a single correct letter is added to their answer

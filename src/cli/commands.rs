@@ -105,13 +105,7 @@ pub fn edit(object: &Object)
 // exe edit deck <deck>
 fn edit_deck(deck: &Deck) 
 {
-    let deck_name  = deck.deck_name.clone();
-    let decks_path = format!(".test/decks/{deck_name}.deck");
-    if !PathBuf::from(&decks_path).exists() 
-    {
-        return eprintln!("Error: Deck `{deck_name}` not found!");
-    }
-
+    let deck_name  = deck.deck_name.to_owned();
     Commands::edit_deck(deck_name)
 }
 
@@ -156,7 +150,7 @@ pub fn list(object: &ListObject, deck_path: &PathBuf)
 // exe list decks
 fn list_decks(deck_path: &PathBuf) 
 {
-    Commands::list_decks(deck_path)
+    Commands::list_decks()
         .iter()
         .for_each(|deck_name| println!("{deck_name}"))
 }

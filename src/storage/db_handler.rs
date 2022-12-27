@@ -1,12 +1,14 @@
-use std::path::{Path, PathBuf};
-use glob::glob;
+use std::path::PathBuf;
 
-use crate::{common::{commands, decks::Decks, deck::Deck, card::Card}, user::deck_handler::DeckHandler};
+use crate::{
+    common::{ decks::Decks, deck::Deck, card::Card }, 
+    user::deck_handler::DeckHandler
+};
 #[derive(Debug, Clone)]
 pub struct DbHandler 
 {
     decks: Decks,
-    file_path: PathBuf,
+    db_file_path: PathBuf,
     config_path: String,
 }
 
@@ -18,65 +20,82 @@ impl DbHandler
         if !config_path_buf.exists()
         {
             let db_file = format!("{config_path}/db-file.json");
-            DbHandler::new_file(&db_file);
+            DbHandler::new_db_file(&db_file);
         }
 
-        let file_path = PathBuf::from(format!("{config_path}/db-file.json"));
+        let db_file_path = PathBuf::from(format!("{config_path}/db-file.json"));
         let decks     = DbHandler::read(config_path);
 
-        Self { decks, file_path, config_path: config_path.into() }
-    }
-    pub fn get_decks(&self) -> Decks
-    {
-        return self.decks.clone();
-    }
-    // Before reading, update it with the user's verison
-    pub fn sync(&mut self)
-    {
-        // let user_decks = DeckHandler::list_user_decks(&self.config_path);
-        // // If no decks/ or decks/ is empty and db is empty, create empty Decks
-        // let mut decks_path = PathBuf::from("./test/decks");
-        // let has_decks_dir = decks_path.exists();
-        // if !has_decks_dir 
-        // {
-        //     std::fs::create_dir(&decks_path).unwrap();
-        // }
-
-        // decks_path.push("/*");
+        Self { decks, db_file_path, config_path: config_path.into() }
     }
 
     pub fn sync_decks(&mut self) 
     {
-        let user_deck_names = DeckHandler::list_user_decks(&self.config_path);
-        println!("{user_deck_names:#?}");
+        let config_path          = self.config_path.clone();
+        let user_deck_names      = DeckHandler::list_user_decks(&self.config_path);
+        let db_decks: Vec<Deck>  = self.get_decks().list_decks();
+        let mut new_decks: Decks = Decks::new();
+
+        for user_deck_name in user_deck_names 
         {
-            // let db_deck_names = self.decks.list_decks().iter().map(|x| x.get_name());
-            // println!("{db_deck_names:#?}");
+            let db_deck = db_decks.iter().find(|d| d.get_name() == user_deck_name );
+            // If user deck has one that db doesn't, update db
+            if db_deck.is_none() 
+            {
+                let deck_path    = format!("{config_path}/decks/{user_deck_name}.deck");
+                let deck_buffer  = PathBuf::from(&deck_path);
+                let mut new_deck = Deck::new(&deck_buffer);
+
+                self.sync_cards(&mut new_deck);
+                new_decks.add_deck(new_deck, true).unwrap();
+                continue;
+            }
+
+            let mut db_deck = db_deck.unwrap().clone();
+            self.sync_cards(&mut db_deck);
+            new_decks.add_deck(db_deck, true).unwrap();
         }
-        todo!();
 
-        // for deck in user_deck_names
-        // {
-        //     let deck_path = format!("{}/decks/{deck}.deck", self.config_path);
-
-        // }
+        let storage = DbHandler::new(&config_path);
+        self.decks  = new_decks.to_owned();
+        storage.save(&self.decks);
     }
 
-    pub fn sync_cards(&mut self, deck: &Deck)
+    pub fn sync_cards(&mut self, deck: &mut Deck)
     {
         let deck_path = format!("{}/decks/{}.deck", self.config_path, deck.get_name());
         let deck_buffer = PathBuf::from(&deck_path);
         let user_cards = DeckHandler::read_to_vec(&deck_buffer).unwrap();
+        let db_cards = deck.list_cards().unwrap();
 
+        for user_card in user_cards 
+        {
+            let front_back: Vec<&str> = user_card
+                .split('=')
+                .collect();
 
-
+            let front   = front_back[0].trim().to_string();
+            let back    = front_back.get(1);
+            let db_card = db_cards.iter()
+                .find(|c| *c == &front_back[0]);
+            if db_card.is_none() 
+            {
+                let back = back.unwrap().trim().to_string();
+                let new_card = Card::new(front, back);
+                deck.add_card(&new_card, true).unwrap();
+            }
+        }
+        // Don't save cards to db here
     }
 
-    pub fn list_decks(&mut self) 
+    pub fn get_decks(&self) -> Decks
     {
-        let a = self.decks.list_decks();
+        return self.decks.clone();
+    }
 
-
+    pub fn list_cards(&mut self, deck: &Deck) -> Vec<Card>
+    {
+        return deck.list_db_cards();
     }
 
     pub fn read(config_path: &str) -> Decks
@@ -84,7 +103,7 @@ impl DbHandler
         let storage_path     = format!("{config_path}/db-file.json");
         if !PathBuf::from(&storage_path).exists() 
         {
-            DbHandler::new_file(&storage_path);
+            DbHandler::new_db_file(&storage_path);
         }
 
         let storage_contents = std::fs::read_to_string(storage_path).unwrap();
@@ -93,7 +112,7 @@ impl DbHandler
         return decks;
     }
 
-    pub fn new_file(path: &str) 
+    pub fn new_db_file(path: &str) 
     {
         std::fs::File::create(path).unwrap();
         let new_deck = Decks::new();
@@ -109,7 +128,7 @@ impl DbHandler
     pub fn save(&self, decks: &Decks)
     {
         let json_decks = serde_json::to_string(decks).unwrap();
-        std::fs::write(self.file_path.clone(), json_decks).unwrap()
+        std::fs::write(self.db_file_path.clone(), json_decks).unwrap()
     }
     // Pull from User's decks and update db
     pub fn add_deck(&self, deck: &Deck)
@@ -128,7 +147,7 @@ impl DbHandler
         storage.save(&decks);
     }
 
-    pub fn add_card(&self, card: &Card, deck_name: &str) 
+    pub fn add_card(&mut self, card: &Card, deck_name: &str) 
     {
         let deck_buffer = PathBuf::from(format!("{}/{}",self.config_path, deck_name));
         let storage     = DbHandler::new(&self.config_path);
@@ -140,9 +159,43 @@ impl DbHandler
             None    => Deck::new(&deck_buffer)
         };
 
-        deck.add_card(&card).unwrap();
+        deck.add_card(&card, false).unwrap();
         decks.update_deck(&deck);
         storage.save(&decks);
+        self.decks = decks.to_owned();
+    }
 
+    pub fn remove_deck(&mut self, deck_name: &str) 
+    {
+        let storage   = DbHandler::new(&self.config_path);
+        let mut decks = storage.get_decks();
+
+        let deck = self.clone().decks.get_deck(deck_name.into());
+        if deck.is_none() 
+        {
+            return eprintln!("Error: `{deck_name}` does not exist!");
+        }
+
+        decks.remove_deck(&deck.as_ref().unwrap());
+        storage.save(&decks);
+        self.decks = decks.to_owned();
+    }
+
+    pub fn rename_deck(&mut self, deck_name: &str, new_name: &str) 
+    {
+        let storage   = DbHandler::new(&self.config_path);
+        let mut decks = storage.get_decks();
+
+        let deck = self.clone().decks.get_deck(deck_name.into());
+
+        if deck.is_some()
+        {
+            return eprintln!("Error: `{new_name}` already exists!");
+        }
+
+        let mut deck = deck.unwrap();
+        deck.set_name(new_name);
+        decks.update_deck(&deck);
+        storage.save(&decks);
     }
 }

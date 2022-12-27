@@ -50,8 +50,8 @@ impl Deck
         let deck_as_vec: Vec<String> = DeckHandler::read_to_vec(path).unwrap();
         for row in deck_as_vec
         {
-            let new_card: Card = DeckHandler::row_to_card(row);
-            self.add_card(&new_card).unwrap();
+            let new_card: Card = DeckHandler::row_to_card(&row);
+            self.add_card(&new_card, false).unwrap();
         }
     }
 
@@ -59,20 +59,22 @@ impl Deck
     {
         return Ok(DeckHandler::read_to_vec(&self.path)?);
     }
-    pub fn add_card(&mut self, new_card: &Card) -> Result<(), String>
+    pub fn list_db_cards(&self) -> Vec<Card> 
     {
-        match self.cards.iter().find(|card| *card == new_card)
+        return self.cards.to_owned();
+    }
+    pub fn add_card(&mut self, new_card: &Card, syncing: bool) -> Result<(), String>
+    {
+        let card = self.cards.iter().find(|c| *c == new_card);
+        if card.is_some() && !syncing 
         {
-            Some(_) => 
-            {
-                let error_msg = "This card is already in the deck";
-                return Err(error_msg.into());
-            },
-            None => {
-                self.cards.push(new_card.to_owned());
-                self.unseen_count +=1;
-            }
+            let error_msg = "This card is already in the deck";
+            return Err(error_msg.into());
         }
+
+        self.cards.push(new_card.to_owned());
+        self.unseen_count +=1;
+
         return Ok(());
     }
 
@@ -93,5 +95,15 @@ impl Deck
     {
         return self.name.clone();
 
+    }
+
+    pub fn set_name(&mut self, name: &str) 
+    {
+        self.name = String::from(name);
+    }
+
+    pub fn get_path(&self) -> PathBuf 
+    {
+        return self.path.to_owned();
     }
 }
