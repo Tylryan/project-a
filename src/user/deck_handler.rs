@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use glob::glob;
 
-use crate::common::card::Card;
+use crate::common::{card::Card, self};
 
 // When dealing with a deck's contents, use the deck reader.
 pub struct DeckHandler { }
@@ -23,8 +23,11 @@ impl DeckHandler
     }
 
     // NOTE: This should work for TUI as well
-    pub fn add_card(front: &str, back: &str, deck_path: &PathBuf) 
+    pub fn add_card(card: &common::card::Card, deck_path: &PathBuf) 
     {
+        let front = card.get_front();
+        let back  = card.get_back();
+
         let mut og_cards: Vec<String> = DeckHandler::read_to_vec(&deck_path).unwrap();
         // If the card already exists in the deck
         if let Some(_) = DeckHandler::find_index(&front, &og_cards) 
@@ -45,6 +48,7 @@ impl DeckHandler
         og_cards.push(new_card);
         new_cards = og_cards.join("\n");
         std::fs::write(deck_path, new_cards).unwrap();
+
     }
 
     pub fn row_to_card(row: String) -> Card 

@@ -51,13 +51,17 @@ impl Deck
         for row in deck_as_vec
         {
             let new_card: Card = DeckHandler::row_to_card(row);
-            self.add_card(new_card).unwrap();
+            self.add_card(&new_card).unwrap();
         }
     }
 
-    pub fn add_card(&mut self, new_card: Card) -> Result<(), String>
+    pub fn list_cards(&self) -> Result<Vec<String>, std::io::Error>
     {
-        match self.cards.iter().find(|card| *card == &new_card)
+        return Ok(DeckHandler::read_to_vec(&self.path)?);
+    }
+    pub fn add_card(&mut self, new_card: &Card) -> Result<(), String>
+    {
+        match self.cards.iter().find(|card| *card == new_card)
         {
             Some(_) => 
             {
@@ -65,7 +69,7 @@ impl Deck
                 return Err(error_msg.into());
             },
             None => {
-                self.cards.push(new_card);
+                self.cards.push(new_card.to_owned());
                 self.unseen_count +=1;
             }
         }

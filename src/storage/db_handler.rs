@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use glob::glob;
 
-use crate::{common::{commands, decks::Decks, deck::Deck}, user::deck_handler::DeckHandler};
+use crate::{common::{commands, decks::Decks, deck::Deck, card::Card}, user::deck_handler::DeckHandler};
 #[derive(Debug, Clone)]
 pub struct DbHandler 
 {
@@ -50,9 +50,10 @@ impl DbHandler
         let user_deck_names = DeckHandler::list_user_decks(&self.config_path);
         println!("{user_deck_names:#?}");
         {
-            let db_deck_names = self.decks.list_decks().iter().map(|x| x.get_name());
-            println!("{db_deck_names:#?}");
+            // let db_deck_names = self.decks.list_decks().iter().map(|x| x.get_name());
+            // println!("{db_deck_names:#?}");
         }
+        todo!();
 
         // for deck in user_deck_names
         // {
@@ -114,14 +115,34 @@ impl DbHandler
     pub fn add_deck(&self, deck: &Deck)
     {
         let deck_buffer = PathBuf::from(format!("{}/{}",self.config_path, deck.get_name()));
-        let storage   = DbHandler::new(&self.config_path);
-        let mut decks = storage.get_decks();
+        let storage     = DbHandler::new(&self.config_path);
+        let mut decks   = storage.get_decks();
+
         let deck = match decks.get_deck(deck.get_name())
         {
             Some(d) => d,
             None    => Deck::new(&deck_buffer)
         };
+
         decks.update_deck(&deck);
         storage.save(&decks);
+    }
+
+    pub fn add_card(&self, card: &Card, deck_name: &str) 
+    {
+        let deck_buffer = PathBuf::from(format!("{}/{}",self.config_path, deck_name));
+        let storage     = DbHandler::new(&self.config_path);
+        let mut decks   = storage.get_decks();
+
+        let mut deck = match decks.get_deck(deck_name.to_string())
+        {
+            Some(d) => d,
+            None    => Deck::new(&deck_buffer)
+        };
+
+        deck.add_card(&card).unwrap();
+        decks.update_deck(&deck);
+        storage.save(&decks);
+
     }
 }

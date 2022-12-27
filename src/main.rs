@@ -23,7 +23,7 @@ fn main()
 
     // storage::db_handler::DbHandler::new(config_path);
     let storage   = DbHandler::new(config_path);
-    let card      = Card::new("Hi".into(),"world".into());
+    let card      = Card::new("Hello".into(),"world".into());
     let mut decks = storage.get_decks();
     let mut deck = match decks.get_deck(deck_name.into())
     {
@@ -33,8 +33,8 @@ fn main()
     // println!("{:#?}", deck);
     // decks.remove_deck(&deck);
     // deck.add_card(card).unwrap();
-    decks.add_deck(deck.clone()).unwrap();
-    decks.update_deck(&deck);
+    // decks.add_deck(deck.clone()).unwrap();
+    // decks.update_deck(&deck);
     // println!("{:#?}", deck);
     storage.save(&decks);
     // for i in decks.list_decks() 

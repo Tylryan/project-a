@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use glob::glob;
 
+use crate::storage::db_handler::DbHandler;
 use crate::user::deck_handler::DeckHandler;
 use crate::common;
 
@@ -12,18 +13,28 @@ impl Commands
     { 
         // Eventually will be able to add subdecks
         let config_path = "./test";
-        let mut decks_path  = PathBuf::from(format!("{config_path}/decks"));
-        if !decks_path.exists() 
+        let decks_dir   = PathBuf::from(format!("{config_path}/decks"));
+
+        if !decks_dir.exists() 
         { 
-            std::fs::create_dir(&decks_path).unwrap()
+            std::fs::create_dir(&decks_dir).unwrap()
         }
+
+        let deck_path   = format!("{config_path}/decks/{deck_name}.deck");
+        let deck_buffer = PathBuf::from(format!("{deck_path}"));
+        let new_deck    = common::deck::Deck::new(&deck_buffer);
+
+        if deck_buffer.exists()
+        {
+            return eprintln!("Error: Deck `{deck_name}` already exists!");
+        }
+
         // Create it for the user
-        decks_path.push(format!("{deck_name}.deck"));
-        std::fs::File::create(&decks_path).unwrap();
-        // Add it to the database
-        // Read it to json
-        // update json
-        // save changes to file
+        std::fs::File::create(&deck_buffer).unwrap();
+        // Create it for the database
+        let storage = DbHandler::new(config_path);
+        storage.add_deck(&new_deck);
+
     }
     pub fn remove_deck(deck_name: String) 
     { 
@@ -88,7 +99,29 @@ impl Commands
     pub fn add_subdeck(decks_names: String) { todo!()}
     pub fn remove_subdeck(deck_name: String) { todo!() }
     pub fn rename_subdeck(deck_name: String) { todo!() }
-    pub fn add_card(front: String, back: String, deck_name: String) { todo!() }
+    pub fn add_card(card: &common::card::Card, deck_name: &str) 
+    { 
+        let deck_path_str = format!("./test/decks/{deck_name}.deck");
+        let deck_path     = PathBuf::from(&deck_path_str);
+        let config_path   = "./test";
+        // check if deck exists
+        if !deck_path.exists() 
+        {
+            return eprintln!("Error: Deck `{deck_name}` not found!");
+        }
+
+        let cards: Vec<String> = DeckHandler::read_to_vec(&deck_path).unwrap();
+        let front              = card.get_front();
+
+        if let Some(_) = DeckHandler::find_index(&front, &cards) 
+        {
+            return eprintln!("Error: Card `{}` already in deck!", front);
+        }
+
+        DeckHandler::add_card(&card, &deck_path);
+        let storage = DbHandler::new(config_path);
+        storage.add_card(&card, &deck_name);
+    }
     pub fn remove_card(front: String, deck_name: String) { todo!() }
     pub fn rename_card(front: String) { todo!() }
 }
