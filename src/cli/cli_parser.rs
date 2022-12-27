@@ -90,7 +90,7 @@ impl Cli
 {
     pub fn run_clap() 
     {
-        let decks_path = PathBuf::from("./decks");
+        let decks_path = PathBuf::from("./test/decks");
         let cli = Cli::parse();
         match &cli.action 
         {

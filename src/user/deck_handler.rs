@@ -1,12 +1,15 @@
 use std::path::PathBuf;
 
-use crate::tui::card::Card;
+use glob::glob;
+
+use crate::common::card::Card;
 
 // When dealing with a deck's contents, use the deck reader.
 pub struct DeckHandler { }
 
 impl DeckHandler 
 {
+    // Read deck to vec
     pub fn read_to_vec(path: &PathBuf) -> Result<Vec<String>, std::io::Error>
     {
         let file_contents: Vec<String> = std::fs::read_to_string(path)?
@@ -89,7 +92,19 @@ impl DeckHandler
             } 
             else { new_hector.push(line.clone()); }
         }
-
         return new_hector;
+    }
+
+    pub fn list_user_decks(config_path: &str) -> Vec<String> 
+    {
+        let decks_path = format!("{config_path}/decks/*");
+        let decks_list: Vec<String> = glob(&decks_path)
+            .unwrap()
+            .map(|x| x.unwrap().to_str()
+                 .to_owned()
+                 .unwrap()
+                 .to_string())
+            .collect();
+        return decks_list;
     }
 }

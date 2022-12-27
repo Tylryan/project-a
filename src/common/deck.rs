@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use serde::{Serialize, Deserialize};
 
-use crate::tui::card::Card;
+use crate::common::card::Card;
 use crate::user::deck_handler::DeckHandler;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ impl PartialEq for Deck
 {
     fn eq(&self, other: &Deck) -> bool 
     {
-        return self.name == other.name;
+        return self.name.to_lowercase() == other.name.to_lowercase();
     }
 }
 
@@ -29,7 +29,8 @@ impl Deck
     pub fn new(path: &PathBuf) -> Self
     { 
         let path: PathBuf     = path.clone();
-        let deck_name: String = path.file_name()
+        let deck_name: String = path.file_stem()
+            // .file_name()
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -63,7 +64,10 @@ impl Deck
                 let error_msg = "This card is already in the deck";
                 return Err(error_msg.into());
             },
-            None => self.cards.push(new_card)
+            None => {
+                self.cards.push(new_card);
+                self.unseen_count +=1;
+            }
         }
         return Ok(());
     }
@@ -79,5 +83,11 @@ impl Deck
             .args(["-c", &command])
             .spawn().unwrap()
             .wait().unwrap();
+    }
+
+    pub fn get_name(&self) -> String 
+    {
+        return self.name.clone();
+
     }
 }

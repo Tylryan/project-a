@@ -1,0 +1,5 @@
+1. move cards,deck,decks to common/
+2. Cli input to actual Card/Deck/Decks structures
+3. Actual structures to json
+
+

@@ -21,7 +21,9 @@ use std::path::PathBuf;
 
 use crate::common::commands::Commands;
 use crate::cli::cli_parser::{Object, Objects, ListObject, ListObjects, Deck, Card};
+use crate::storage::db_handler::DbHandler;
 use crate::user::deck_handler::DeckHandler;
+use crate::{common, storage};
 
 pub fn add(object: &Object) 
 {
@@ -35,14 +37,19 @@ pub fn add(object: &Object)
 // exe add deck <deck>
 fn add_deck(deck: &Deck) 
 {
+    let config_path = "./test";
     let deck_name  = deck.deck_name.clone();
-    let decks_path = format!("./test/decks/{deck_name}.deck");
+    let decks_path = format!("{config_path}/decks/{deck_name}.deck");
+    let deck_buffer = PathBuf::from("{config_path}/{deck_name}");
+    let new_deck = common::deck::Deck::new(&deck_buffer);
     if PathBuf::from(&decks_path).exists() 
     {
         return eprintln!("Error: Deck `{deck_name}` already exists!");
     }
-
     Commands::add_deck(deck.deck_name.clone());
+
+    let storage = storage::db_handler::DbHandler::new(config_path);
+    storage.add_deck(&new_deck);
 }
 
 // exe add card front::back deck_name
@@ -53,6 +60,7 @@ fn add_card(card: &Card)
     let deck_name     = card.deck_name.clone();
     let deck_path_str = format!("./test/decks/{deck_name}.deck");
     let deck_path     = PathBuf::from(&deck_path_str);
+    let config_path = "./test";
 
     // check if deck exists
     if !deck_path.exists() 
@@ -79,6 +87,7 @@ fn add_card(card: &Card)
 
     // When making changes (getting info) to a deck's contents, use the DeckHandler
     DeckHandler::add_card(&front, back.unwrap(), &deck_path);
+    let db = DbHandler::new(config_path);
 }
 
 pub fn remove(object: &Object) 

@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use glob::glob;
 
 use crate::user::deck_handler::DeckHandler;
+use crate::common;
 
 pub struct Commands { }
 
@@ -16,8 +17,13 @@ impl Commands
         { 
             std::fs::create_dir(&decks_path).unwrap()
         }
+        // Create it for the user
         decks_path.push(format!("{deck_name}.deck"));
         std::fs::File::create(&decks_path).unwrap();
+        // Add it to the database
+        // Read it to json
+        // update json
+        // save changes to file
     }
     pub fn remove_deck(deck_name: String) 
     { 
@@ -37,6 +43,7 @@ impl Commands
         let deck_path  = deck_path
             .to_string_lossy()
             .to_string() + "/*";
+
         let deck_paths = glob(&deck_path).unwrap();
 
         for deck in deck_paths
