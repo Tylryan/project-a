@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use chrono::{prelude::*, Duration};
 use serde::{Serialize, Deserialize};
 
@@ -27,6 +29,7 @@ pub struct Card
     front: String,
     back: String,
     difficulty: Difficulty,
+    status: CardStatus,
     date_created: DateTime<Local>,
     last_show_date: DateTime<Local>,
     next_show_date: DateTime<Local>,
@@ -37,10 +40,12 @@ impl PartialEq for Card
 {
     fn eq(&self, other: &Self) -> bool
     {
-        let fronts_equal = self.front == other.front;
-        let backs_equal  = self.back == other.back;
+        return self.front == other.front;
+    }
 
-        return fronts_equal && backs_equal;
+    fn ne(&self, other: &Self) -> bool 
+    {
+        self.front != other.front
     }
 }
 
@@ -54,6 +59,7 @@ impl Card
             front,
             back,
             difficulty: Difficulty::None,
+            status: CardStatus::Unseen,
             date_created: current_date,
             last_show_date: current_date,
             next_show_date,
@@ -70,9 +76,18 @@ impl Card
     {
         self.difficulty = difficulty;
     }
+
     pub fn get_difficulty(&self) -> Difficulty 
     { 
         self.difficulty.clone() 
+    }
+    pub fn get_status(&self) -> CardStatus 
+    {
+        self.status.to_owned()
+    }
+    pub fn set_status(&mut self, status: CardStatus) 
+    {
+        self.status = status
     }
 
     pub fn set_last_show_date(&mut self, last_show_date: DateTime<Local>) 

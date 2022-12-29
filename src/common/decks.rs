@@ -35,7 +35,7 @@ impl Decks
 
     pub fn update_deck(&mut self, deck: &Deck) 
     {
-        let deck_exists = self.get_deck(deck.get_name());
+        let deck_exists = self.get_deck(&deck.get_name());
         
         if deck_exists.is_some() 
         {
@@ -60,7 +60,7 @@ impl Decks
         self.decks = new_decks;
     }
 
-    pub fn get_deck(&self, deck_name: String) -> Option<Deck>
+    pub fn get_deck(&self, deck_name: &str) -> Option<Deck>
     {
         let deck = self.decks.iter().find(|x| x.get_name() == deck_name);
         match deck 

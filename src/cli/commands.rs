@@ -21,8 +21,6 @@ use std::path::PathBuf;
 
 use crate::common::commands::Commands;
 use crate::cli::cli_parser::{Object, Objects, ListObject, ListObjects, Deck, Card};
-use crate::storage::db_handler::DbHandler;
-use crate::user::deck_handler::DeckHandler;
 use crate::common;
 
 pub fn add(object: &Object) 
@@ -34,11 +32,18 @@ pub fn add(object: &Object)
     }
 }
 
-// exe add deck <deck>
-fn add_deck(deck: &Deck) { Commands::add_deck(deck.deck_name.clone()); }
+fn add_deck(deck: &Deck) 
+{ 
+    if deck.deck_name.contains("::") 
+    {
+        // bin add deck <deck1::deck2>
+        return Commands::add_subdeck(&deck.deck_name);
+    }
+    // exe add deck <deck>
+    Commands::add_deck(deck.deck_name.clone()); 
+}
 
-// exe add card front::back deck_name
-// fn add_card(front_back: &str, deck_name: &str) 
+// bin add card front::back deck_name
 fn add_card(card: &Card) 
 {
     let front_back = card.card_name.clone();
@@ -70,6 +75,7 @@ fn add_card(card: &Card)
 
     Commands::add_card(&new_card, &deck_name)
 }
+
 
 pub fn remove(object: &Object) 
 {

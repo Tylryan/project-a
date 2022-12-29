@@ -8,7 +8,6 @@ pub struct Commands { }
 
 impl Commands 
 {
-    // Eventually will be able to add subdecks
     pub fn add_deck(deck_name: String)    
     { 
         let config_path = "./test";
@@ -19,6 +18,49 @@ impl Commands
         DeckHandler::add_deck(&new_deck, config_path);
         let storage = DbHandler::new(config_path);
         storage.add_deck(&new_deck);
+    }
+
+    // Just a POC, not going to implement it for awhile
+    pub fn add_subdeck(deck_name: &str) 
+    {
+        let config_dir = "./test";
+        let subdeck_limit = 2;
+        let deck_names: Vec<&str> = deck_name.split("::").collect();
+
+        if deck_names.len() > subdeck_limit 
+        {
+            eprintln!("Error: Cannot add deck `{}`. Current subdeck limit is {}.",
+                      deck_names[2], subdeck_limit);
+        }
+
+        let deck_one_path = PathBuf::from(
+            format!("{config_dir}/decks/{}.deck", deck_names[0]));
+        let mut deck_two_path = PathBuf::new();
+
+        if deck_names.len() == 2 
+        {
+            deck_two_path.push(
+                format!("{config_dir}/decks/{}-{}.deck", 
+                        deck_names[0],
+                        deck_names[1]));
+        }
+
+        let storage = DbHandler::new(config_dir);
+        if !deck_one_path.exists() 
+        {
+            let new_deck = common::deck::Deck::new(&deck_one_path);
+            DeckHandler::add_deck(&new_deck, config_dir);
+            storage.add_deck(&new_deck);
+        }
+        if !deck_two_path.exists() 
+        {
+            let new_deck = common::deck::Deck::new(&deck_two_path);
+            DeckHandler::add_deck(&new_deck, config_dir);
+            storage.add_deck(&new_deck);
+            return;
+        }
+
+        return eprintln!("Error: Deck `{}` already exists!", deck_names[1]);
     }
 
     // Eventually will be able to add subdecks
@@ -69,7 +111,6 @@ impl Commands
     }
     pub fn remove_card(front: String, deck_name: String) { todo!() }
     pub fn rename_card(front: String) { todo!() }
-    pub fn add_subdeck(decks_names: String) { todo!()}
     pub fn remove_subdeck(deck_name: String) { todo!() }
     pub fn rename_subdeck(deck_name: String) { todo!() }
 }

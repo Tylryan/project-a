@@ -1,20 +1,6 @@
                         AUDIO AND IMAGES
 - Audio with ffplay
 - Display image somehow (viu)
-$HOME/config/
-    |
-    decks/
-        |
-        english/
-            |___ english.deck
-            |___ hello.png
-            |___ hello.mp3
-            |___ subdeck/
-
-add image <*.png> <card_front::deck>
-add audio <*.mp3> <card::deck>
-
-This will even help wth subdecks
 ==============================================================================
                             TUI
 Home Page Keybindings

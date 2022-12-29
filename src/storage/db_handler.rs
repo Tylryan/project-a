@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, io::ErrorKind, process::exit};
 
 use crate::{
     common::{ decks::Decks, deck::Deck, card::Card }, 
@@ -24,7 +24,7 @@ impl DbHandler
         }
 
         let db_file_path = PathBuf::from(format!("{config_path}/db-file.json"));
-        let decks     = DbHandler::read(config_path);
+        let decks        = DbHandler::read(config_path);
 
         Self { decks, db_file_path, config_path: config_path.into() }
     }
@@ -51,6 +51,7 @@ impl DbHandler
                 continue;
             }
 
+            // Once
             let mut db_deck = db_deck.unwrap().clone();
             self.sync_cards(&mut db_deck);
             new_decks.add_deck(db_deck, true).unwrap();
@@ -66,24 +67,44 @@ impl DbHandler
         let deck_path = format!("{}/decks/{}.deck", self.config_path, deck.get_name());
         let deck_buffer = PathBuf::from(&deck_path);
         let user_cards = DeckHandler::read_to_vec(&deck_buffer).unwrap();
-        let db_cards = deck.list_cards().unwrap();
+        let db_cards = deck.list_card_names();
 
-        for user_card in user_cards 
+        // Add cards to DB if needed
+        for user_card in user_cards.iter()
         {
             let front_back: Vec<&str> = user_card
                 .split('=')
                 .collect();
 
+            if front_back.first().unwrap() == &"" { break }
+
+
             let front   = front_back[0].trim().to_string();
             let back    = front_back.get(1);
             let db_card = db_cards.iter()
-                .find(|c| *c == &front_back[0]);
+                .find(|c| *c == &front);
+
             if db_card.is_none() 
             {
+                println!("Added card: {}", user_card);
                 let back = back.unwrap().trim().to_string();
                 let new_card = Card::new(front, back);
                 deck.add_card(&new_card, true).unwrap();
             }
+        }
+
+        // Remove cards from db if needed
+        for db_card in db_cards 
+        {
+            let user_card = DeckHandler::find_index(&db_card, &user_cards);
+            if user_card.is_some() {continue}
+            
+            let card = deck.get_cards().iter()
+                .find(|c| c.get_front() == db_card)
+                .unwrap()
+                .to_owned();
+
+            deck.remove_card(card);
         }
         // Don't save cards to db here
     }
@@ -106,7 +127,9 @@ impl DbHandler
             DbHandler::new_db_file(&storage_path);
         }
 
-        let storage_contents = std::fs::read_to_string(storage_path).unwrap();
+        let err_msg = format!("Error: `{storage_path}` does not exist!");
+        let storage_contents = std::fs::read_to_string(storage_path)
+            .expect("Error: `{storage_path}` does not exist!");
         let decks: Decks     = serde_json::from_str(&storage_contents).unwrap();
 
         return decks;
@@ -114,7 +137,27 @@ impl DbHandler
 
     pub fn new_db_file(path: &str) 
     {
-        std::fs::File::create(path).unwrap();
+        match std::fs::File::create(path)
+        {
+            Ok(_) => {},
+            Err(e) => match e.kind() 
+            {
+                ErrorKind::NotFound         => 
+                {
+                    return eprintln!("Error: File `{path}` not found!");
+                },
+                ErrorKind::PermissionDenied => 
+                {
+                    return eprintln!("Permission Denied Error: Could not open `{path}`");
+
+                },
+                _other_error                => 
+                {
+                    return eprintln!("Error: problem opening {path}");
+                }
+            }
+        }
+
         let new_deck = Decks::new();
         DbHandler::first_save(&new_deck, path);
 
@@ -137,7 +180,7 @@ impl DbHandler
         let storage     = DbHandler::new(&self.config_path);
         let mut decks   = storage.get_decks();
 
-        let deck = match decks.get_deck(deck.get_name())
+        let deck = match decks.get_deck(&deck.get_name())
         {
             Some(d) => d,
             None    => Deck::new(&deck_buffer)
@@ -153,7 +196,7 @@ impl DbHandler
         let storage     = DbHandler::new(&self.config_path);
         let mut decks   = storage.get_decks();
 
-        let mut deck = match decks.get_deck(deck_name.to_string())
+        let mut deck = match decks.get_deck(deck_name)
         {
             Some(d) => d,
             None    => Deck::new(&deck_buffer)
