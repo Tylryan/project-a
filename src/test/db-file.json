@@ -1,1 +1,139 @@
-{"decks":[{"name":"idk","review":[],"unseen":[],"cards":[{"front":"bye","back":"there","difficulty":"None","status":"Unseen","date_created":"2022-12-29T13:57:17.706768806-06:00","last_show_date":"2022-12-29T13:57:17.706768806-06:00","next_show_date":"2022-12-29T14:13:50.384607457-06:00","times_correct":0},{"front":"hello","back":"there","difficulty":"None","status":"Unseen","date_created":"2022-12-29T13:57:10.330136017-06:00","last_show_date":"2022-12-29T13:57:10.330136017-06:00","next_show_date":"2022-12-29T14:13:04.029330443-06:00","times_correct":0}],"path":"./test/idk","unseen_count":7,"parent_deck":null,"children_decks":null,"max_daily_review":5,"max_daily_new":5}],"count":1}
+{
+  "decks": [
+    {
+      "name": "idk",
+      "review": [],
+      "unseen": [
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:08:05.704986427-06:00",
+          "last_show_date": "2022-12-29T23:08:05.704986427-06:00",
+          "next_show_date": "2022-12-29T23:15:21.053077953-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "well",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:12:06.174245728-06:00",
+          "last_show_date": "2022-12-29T23:12:06.174245728-06:00",
+          "next_show_date": "2022-12-29T23:15:26.838157700-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "my",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:15:25.809923496-06:00",
+          "last_show_date": "2022-12-29T23:15:25.809923496-06:00",
+          "next_show_date": "2022-12-29T23:16:25.809923496-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "something",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:17:15.685525655-06:00",
+          "last_show_date": "2022-12-29T23:17:15.685525655-06:00",
+          "next_show_date": "2022-12-29T23:18:15.685525655-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "me",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:12:55.008900358-06:00",
+          "last_show_date": "2022-12-29T23:12:55.008900358-06:00",
+          "next_show_date": "2022-12-29T23:19:36.311637939-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:08:11.656454036-06:00",
+          "last_show_date": "2022-12-29T23:08:11.656454036-06:00",
+          "next_show_date": "2022-12-29T23:21:41.730464332-06:00",
+          "times_correct": 0
+        }
+      ],
+      "cards": [
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:08:05.704986427-06:00",
+          "last_show_date": "2022-12-29T23:08:05.704986427-06:00",
+          "next_show_date": "2022-12-29T23:15:21.053077953-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "well",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:12:06.174245728-06:00",
+          "last_show_date": "2022-12-29T23:12:06.174245728-06:00",
+          "next_show_date": "2022-12-29T23:15:26.838157700-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "my",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:15:25.809923496-06:00",
+          "last_show_date": "2022-12-29T23:15:25.809923496-06:00",
+          "next_show_date": "2022-12-29T23:16:25.809923496-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "something",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:17:15.685525655-06:00",
+          "last_show_date": "2022-12-29T23:17:15.685525655-06:00",
+          "next_show_date": "2022-12-29T23:18:15.685525655-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "me",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:12:55.008900358-06:00",
+          "last_show_date": "2022-12-29T23:12:55.008900358-06:00",
+          "next_show_date": "2022-12-29T23:19:36.311637939-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2022-12-29T23:08:11.656454036-06:00",
+          "last_show_date": "2022-12-29T23:08:11.656454036-06:00",
+          "next_show_date": "2022-12-29T23:21:41.730464332-06:00",
+          "times_correct": 0
+        }
+      ],
+      "path": "./test/idk",
+      "unseen_count": 6,
+      "parent_deck": null,
+      "children_decks": null,
+      "max_daily_review": 5,
+      "max_daily_new": 5
+    }
+  ],
+  "count": 1
+}

@@ -26,9 +26,10 @@ impl Decks
                 let err_msg = format!("Error: Deck `{}` already exists", deck.get_name());
                 return Err(err_msg);
             }
+
+            self.count +=1;
         }
 
-        self.count +=1;
         self.decks.push(deck);
         return Ok(());
     }
@@ -55,6 +56,7 @@ impl Decks
             {
                 new_decks.push(d.to_owned());
             } 
+            else if self.count == 0 { }
             else { self.count -=1;}
         }
         self.decks = new_decks;

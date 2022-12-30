@@ -165,12 +165,12 @@ impl DbHandler
     // Save json to file
     fn first_save(decks: &Decks, path: &str)
     {
-        let json_decks = serde_json::to_string(decks).unwrap();
+        let json_decks = serde_json::to_string_pretty(decks).unwrap();
         std::fs::write(path, json_decks).unwrap()
     }
     pub fn save(&self, decks: &Decks)
     {
-        let json_decks = serde_json::to_string(decks).unwrap();
+        let json_decks = serde_json::to_string_pretty(decks).unwrap();
         std::fs::write(self.db_file_path.clone(), json_decks).unwrap()
     }
     // Pull from User's decks and update db

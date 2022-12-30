@@ -99,9 +99,9 @@ impl Deck
             .filter(|c| c.get_status() == CardStatus::Unseen)
             .map(|c| c.to_owned())
             .collect();
-        self.unseen = unseen_list;
+        self.unseen = unseen_list.to_owned();
+        self.unseen_count = unseen_list.len();
     }
-
 
     pub fn update_card(&mut self, new_card: &Card) -> Result<(), String>
     {
@@ -113,8 +113,10 @@ impl Deck
             return Err(err_msg);
 
         }
+
         self.remove_card(old_card.unwrap());
         self.add_card(new_card, false).unwrap();
+        self.set_unseen();
         // Remove existing card
         // Add new card
         return Ok(());
@@ -150,8 +152,9 @@ impl Deck
         for row in deck_as_vec
         {
             let new_card: Card = DeckHandler::row_to_card(&row);
-            // self.add_card(&new_card, false).unwrap();
+            self.add_card(&new_card, false).unwrap();
         }
+        self.set_unseen();
     }
 
     pub fn list_card_names(&self) -> Vec<String>
@@ -182,10 +185,9 @@ impl Deck
             let error_msg = "This card is already in the deck";
             return Err(error_msg.into());
         }
-
         self.cards.push(new_card.to_owned());
-        self.unseen_count +=1;
-        println!("ADDED Card");
+        if !syncing { self.unseen_count +=1; }
+        self.set_unseen();
 
         return Ok(());
     }
