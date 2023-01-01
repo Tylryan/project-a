@@ -17,34 +17,167 @@
 //     - if self.show_next - today > 1 month;
 //         - self.status = CardStatus::Mature
 
-use std::borrow::BorrowMut;
+use std::{io::Write, process::exit};
 
-use chrono::Duration;
+use chrono::{Duration, Local};
 
 // This might not be useful to do it this way
-use crate::common::{
+use crate::{common::{
     deck::Deck,
-    card::Card,
-};
+    card::{Card, Difficulty, CardStatus},
+    decks::Decks,
+}, storage::db_handler::DbHandler};
+
+// Rename to something else
+pub enum Message 
+{
+    QuitNoMessage,
+    QuitWithMessage(String),
+    Continue,
+}
 
 pub struct ReviewSystem
 {
     deck: Deck,
-    pub study_cards: Vec<Card>,
-    current_card: Option<Card>
+    decks: Decks,
+    study_cards: Vec<Card>,
+    current_card: Option<Card>,
+    storage: DbHandler,
+    cards_reviewed: usize,
 }
 
 impl ReviewSystem
 {
-    pub fn new(deck: &Deck) -> Self
+    pub fn new(deck: &Deck, storage: &DbHandler) -> Self
     {
         Self { 
-            deck: deck.to_owned(), 
+            deck: deck.to_owned(),
+            decks: storage.get_decks(),
             study_cards: Vec::new(),  
             current_card: None,
+            storage: storage.to_owned(),
+            cards_reviewed: 0,
         }
     }
 
+    pub fn study_cli(&mut self)
+    {
+        // Get the deck
+        // ---- Normally wouldn't do this way
+        // let deck: Deck   = self.storage.get_decks()
+        //     .get_deck(&self.deck.get_name())
+        //     .unwrap();
+        self.storage.sync_decks();
+        // let rs = Self::new(&deck, &storage);
+        // ------------------
+        match self.study() 
+        {
+            Message::QuitNoMessage => return,
+            Message::QuitWithMessage(message) => 
+            {
+                println!("{message}");
+                exit(0);
+            },
+            Message::Continue => {}
+        }
+    }
+    // Eventually these will be KeyBindings
+    pub fn study(&mut self) -> Message
+    {
+        self.generate_study_deck();
+        let current_card = self.get_current_card();
+
+        if current_card.is_none() 
+        {
+            return Message::QuitWithMessage("No Cards to study!".into());
+        }
+        let front = current_card.clone().unwrap().get_front();
+        let back  = current_card.clone().unwrap().get_back();
+        print!("{front}: ");
+        std::io::stdout().flush().unwrap();
+        let input = Self::input();
+        if input == "q" { return Message::QuitNoMessage;}
+        else if input == back
+        {
+            self.card_correct(&current_card.unwrap());
+        }
+        else if input != back 
+        {
+            self.card_incorrect(&current_card.unwrap());
+        }
+
+        return Message::Continue;
+    }
+
+    pub fn card_correct(&mut self, current_card: &Card)
+    {
+            println!("CORRECT!");
+
+            // rs.mark_correct(&current_card.as_ref().unwrap());
+            let mut new_card   = current_card.to_owned();
+            new_card.set_status(CardStatus::Review);
+            new_card.set_last_show_date(Local::now());
+            let times_correct = new_card.get_times_correct() + 1;
+            new_card.set_times_correct(times_correct);
+            let mut multiplier = times_correct.clone() as i64;
+            println!("Next Show: {}", new_card.get_next_show_date());
+            println!("Times correct: {}", new_card.get_times_correct());
+            print!("Difficulty from 1-3?: ");
+            std::io::stdout().flush().unwrap();
+            match Self::input().parse().unwrap()
+            {
+                1 => {
+                    new_card.set_difficulty(Difficulty::Easy);
+                    multiplier *= 3;
+                },
+                2 => { new_card.set_difficulty(Difficulty::Normal); },
+                3 => {
+                    new_card.set_difficulty(Difficulty::Hard);
+                    if multiplier == 1 {}
+                    else {multiplier -=1}
+                },
+                _ => { new_card.set_difficulty(Difficulty::Normal); }
+            };
+            println!("Multiplier: {multiplier}");
+            if new_card.get_times_correct() > 3 
+            {
+                // For the sake of readability
+                multiplier = (times_correct - 3) as i64;
+                println!("Multiplier {multiplier}");
+                let next_show_date = new_card.get_last_show_date() + ( Duration::days(multiplier));
+                new_card.set_next_show_date(next_show_date);
+            } 
+            else 
+            {
+                let next_show_date = Local::now() + ( Duration::minutes(2));
+                new_card.set_next_show_date(next_show_date);
+            }
+
+            self.deck.update_card(&new_card).unwrap(); // Works
+            self.deck.set_review();
+            self.deck.set_unseen();
+            self.decks.update_deck(&self.deck);             // Does works
+            self.storage.save(&self.decks);
+
+    }
+    pub fn card_incorrect(&mut self, current_card: &Card)
+    {
+        println!("INCORRECT!");
+        println!("Correct Answer: {}", current_card.get_back());
+        let mut new_card   = current_card.to_owned();
+        new_card.set_status(CardStatus::Review);
+        let next_show_date = Local::now() + Duration::minutes(1);
+        new_card.set_next_show_date(next_show_date);
+        new_card.set_last_show_date(Local::now());
+        new_card.set_times_correct(0);
+        new_card.set_difficulty(Difficulty::Wrong);
+        // Regardless of current card status, set all the way back to review
+        self.deck.update_card(&new_card).unwrap(); // Works
+        self.deck.set_review();
+        self.deck.set_unseen();
+        self.decks.update_deck(&self.deck);             // Does works
+        self.storage.save(&self.decks);
+    }
     pub fn get_current_card(&self) -> Option<Card>
     {
         if let Some(current_card) = self.study_cards.get(0) 
@@ -58,6 +191,11 @@ impl ReviewSystem
     {
         self.set_study_cards();
         self.deck.sort();
+        let naive_today = Local::now().naive_local() + Duration::hours(6);
+        let todays_cards: Vec<Card> = self.deck.get_cards().iter().filter(|c| c.get_next_show_date().naive_local() <= naive_today)
+            .map(|c| c.to_owned())
+            .collect();
+        self.study_cards = todays_cards;
     }
 
     pub fn set_study_cards(&mut self) 
@@ -86,11 +224,6 @@ impl ReviewSystem
         return review_cards;
     }
 
-    pub fn mark_correct(&mut self, card: &Card) 
-    {
-        // let cards = self.deck.get_cards();
-        // cards.iter_mut().find(|c| *c == card).unwrap() = card.borrow_mut();
-    }
     pub fn get_new_cards(&mut self, mut max_new_cards: usize) -> Vec<Card>
     {
         let new_cards = self.deck.get_unseen();
@@ -103,5 +236,13 @@ impl ReviewSystem
         let new_cards = new_cards[..max_new_cards].to_owned();
 
         return new_cards;
+    }
+    fn input() -> String
+    {
+        let mut buffer = String::new();
+        std::io::stdin().read_line(&mut buffer).unwrap();
+        std::io::stdout().flush().unwrap();
+
+        return buffer.trim().to_string();
     }
 }
