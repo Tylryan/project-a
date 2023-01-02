@@ -1,1 +1,59 @@
-{ "decks": [ { "name": "idk", "review": [ { "front": "hello", "back": "there", "difficulty": "Wrong", "status": "Review", "date_created": "2022-12-31T16:20:19.913737478-06:00", "last_show_date": "2022-12-31T16:20:24.262494839-06:00", "next_show_date": "2022-12-31T16:21:24.262417332-06:00", "times_correct": 0 } ], "unseen": [], "cards": [ { "front": "hello", "back": "there", "difficulty": "Wrong", "status": "Review", "date_created": "2022-12-31T16:20:19.913737478-06:00", "last_show_date": "2022-12-31T16:20:24.262494839-06:00", "next_show_date": "2022-12-31T16:21:24.262417332-06:00", "times_correct": 0 } ], "path": "./test/idk", "unseen_count": 0, "parent_deck": null, "children_decks": null, "max_daily_review": 5, "max_daily_new": 5 } ], "count": 0 }
+{
+  "decks": [
+    {
+      "name": "idk",
+      "review": [],
+      "unseen": [
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-01T18:14:11.190842347-06:00",
+          "last_show_date": "2023-01-01T18:14:11.190842347-06:00",
+          "next_show_date": "2023-01-01T18:15:11.190842347-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-01T19:21:06.566823522-06:00",
+          "last_show_date": "2023-01-01T19:21:06.566823522-06:00",
+          "next_show_date": "2023-01-01T19:22:06.566823522-06:00",
+          "times_correct": 0
+        }
+      ],
+      "cards": [
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-01T18:14:11.190842347-06:00",
+          "last_show_date": "2023-01-01T18:14:11.190842347-06:00",
+          "next_show_date": "2023-01-01T18:15:11.190842347-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-01T19:21:06.566823522-06:00",
+          "last_show_date": "2023-01-01T19:21:06.566823522-06:00",
+          "next_show_date": "2023-01-01T19:22:06.566823522-06:00",
+          "times_correct": 0
+        }
+      ],
+      "path": "./test/idk",
+      "unseen_count": 2,
+      "parent_deck": null,
+      "children_decks": null,
+      "max_daily_review": 5,
+      "max_daily_new": 5
+    }
+  ],
+  "count": 1
+}

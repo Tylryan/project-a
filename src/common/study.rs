@@ -36,14 +36,15 @@ pub enum Message
     Continue,
 }
 
+#[derive(Debug, Clone)]
 pub struct ReviewSystem
 {
     deck: Deck,
     decks: Decks,
-    study_cards: Vec<Card>,
-    current_card: Option<Card>,
+    pub study_cards: Vec<Card>,
+    pub current_card: Option<Card>,
     storage: DbHandler,
-    cards_reviewed: usize,
+    pub cards_reviewed: usize,
 }
 
 impl ReviewSystem
@@ -60,6 +61,12 @@ impl ReviewSystem
         }
     }
 
+    pub fn study_tui(&mut self) 
+    {
+        self.storage.sync_decks();
+        self.generate_study_deck();
+
+    }
     pub fn study_cli(&mut self)
     {
         // Get the deck

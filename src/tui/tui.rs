@@ -1,3 +1,7 @@
+use std::borrow::BorrowMut;
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use cursive::align::Align;
 use cursive::event::{Key, EventResult, Callback};
 use cursive::theme::{Style, Effect};
@@ -9,7 +13,10 @@ use cursive::event;
 type StudyCard = ResizedView<ResizedView<Panel<LinearLayout>>>;
 
 
+use crate::common::card::Card;
+use crate::common::deck::Deck;
 use crate::common::decks::Decks;
+use crate::common::study::ReviewSystem;
 use crate::storage::db_handler::DbHandler;
 // Grab decks from storage
 //
@@ -20,6 +27,8 @@ pub struct App
     pub screen: Screen,
     pub decks: Decks,
     pub db: DbHandler,
+    pub review_system: Option<ReviewSystem>,
+    pub current_card: RefCell<Box<Option<Card>>>
     // Decks
 }
 
@@ -33,13 +42,14 @@ impl App
             mode: Mode::Normal,
             screen: Screen::Home,
             decks: db.get_decks(),
-            db: DbHandler::new("./test")
+            db: DbHandler::new("./test"),
+            review_system: None,
+            current_card: RefCell::new(Box::new(None))
         }
     }
     pub fn run() {
         let mut siv = cursive::default();
         let app     = App::new();
-
         siv.set_user_data(app);
 
         siv.add_global_callback('q', |s| s.quit());
@@ -106,10 +116,11 @@ impl App
             home_page(s);
         });
 
-        home_page(&mut siv);
+        let home_page = home_page(&mut siv);
+        siv.add_layer(home_page);
 
         siv.run();
-}
+    }
 }
 #[derive(Debug, Clone)]
 pub enum Mode 
@@ -127,7 +138,7 @@ pub enum Screen
 }
 
 
-fn home_page(s: &mut Cursive)
+fn home_page(s: &mut Cursive) -> LinearLayout
 {
     s.with_user_data(|app: &mut App| app.screen = Screen::Home);
     match s.pop_layer() 
@@ -135,6 +146,7 @@ fn home_page(s: &mut Cursive)
         Some(_) => {},
         None    => {}
     }
+
 
     let bold = Style::from(Effect::Bold);
     let underline = Style::from(Effect::Underline);
@@ -145,10 +157,42 @@ fn home_page(s: &mut Cursive)
     let mut decks: SelectView<String> = SelectView::new()
         .align(Align::center_left())
         // .set_on_submit(study_page);
-        .on_submit(|s,item: &str| { 
-            let study_page = get_study_card(s, item.to_string());
-            s.add_layer(study_page);
-            s.screen_mut().add_transparent_layer(DummyView);
+        .on_submit(|s,deck_name: &str| { 
+            //TODO
+            let deck: Deck = s.with_user_data(|app: &mut App| {
+                return app.decks.get_deck(&deck_name).unwrap();
+            }).unwrap();
+
+            let storage = s.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
+            // {
+                let mut rs = ReviewSystem::new(&deck, &storage);
+                rs.generate_study_deck();
+                s.with_user_data(|app: &mut App| app.review_system = Some(rs));
+            // }
+            let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned());
+
+            let current_card = Rc::new(rs.unwrap().unwrap().get_current_card());
+            match current_card.as_ref()
+            {
+                Some(card) => {
+                    let study_page = get_study_card(s, card.to_owned());
+                    s.add_layer(study_page);
+                    s.screen_mut().add_transparent_layer(DummyView);
+                },
+                // Go home
+                None => 
+                {
+                    let no_cards = Dialog::new()
+                        .content(TextView::new("No cards to study!"))
+                        .title("Whoop!");
+                    let no_cards = OnEventView::new(no_cards)
+                        .on_event(Key::Esc, |s| {s.pop_layer();})
+                        .on_event(Key::Enter, |s| {s.pop_layer();})
+                        ;
+                    s.add_layer(no_cards);
+                }
+            }
+            // }
         });
 
     for value in deck_names
@@ -168,7 +212,8 @@ fn home_page(s: &mut Cursive)
                                 Some(EventResult::Consumed(Some(cb)))
                             });
 
-    let home_page = Panel::new(
+    let home_page = LinearLayout::vertical()
+        .child(Panel::new(
         Panel::new(LinearLayout::vertical()
         .child(TextView::new("Decks").style(bold_underline).align(Align::center()))
         .child(DummyView)
@@ -181,38 +226,51 @@ fn home_page(s: &mut Cursive)
         .scrollable()
         )
         .title("HOME")
-        .with_name("home");
-    s.add_layer(home_page);
+        .with_name("home")
+        );
+
+    return home_page;
 }
 
-fn get_study_card(siv: &mut Cursive, front: String) -> StudyCard
+
+fn setup_session(siv: &mut Cursive,deck_name: String) 
+{
+    let deck: Deck = siv.with_user_data(|app: &mut App| {
+        return app.decks.get_deck(&deck_name).unwrap();
+    }).unwrap();
+
+    let storage = siv.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
+    let mut rs = ReviewSystem::new(&deck, &storage);
+    rs.generate_study_deck();
+}
+
+fn get_study_card(siv: &mut Cursive, card: Card) -> StudyCard
 {
     siv.with_user_data(| app: &mut App| app.screen = Screen::Study);
+
     let answer_box = EditView::new()
         .on_submit(|s, answer| {
+            // s.pop_layer().unwrap();
             let difficulty_screen = get_difficulty(s);
             s.add_layer(difficulty_screen);
         });
     let back_door = Dialog::new()
-                           // .title_position(cursive::align::HAlign::Left)
                            .content(answer_box)
                            .padding_top(1)
-                           // .title("Russian")
                            .min_height(5);
-                           // .button("Quit", Cursive::quit))
+
     let front_door = Dialog::new()
-                    // .title("English")
-                    .content(TextView::new(front).align(Align::center()))
+                    .content(TextView::new(card.get_front()).align(Align::center()))
                     .min_height(5);
 
     let study_card = Panel::new(LinearLayout::vertical()
             .child(DummyView)
-            .child(TextView::new("English")
+            .child(TextView::new("Front")
                    .h_align(cursive::align::HAlign::Center)
                    )
             .child(front_door)
             .child(DummyView)
-            .child(TextView::new("Russian")
+            .child(TextView::new("Back")
                    .h_align(cursive::align::HAlign::Center)
                    )
             .child(back_door)
@@ -221,9 +279,7 @@ fn get_study_card(siv: &mut Cursive, front: String) -> StudyCard
             .title("Study")
             .min_width(50)
             .min_height(20);
-
     return study_card;
-
 }
 
 fn get_difficulty(s: &mut Cursive) -> StudyCard
@@ -233,9 +289,16 @@ fn get_difficulty(s: &mut Cursive) -> StudyCard
         .item_str("Easy")
         .item_str("Ok")
         .item_str("Hard")
+        .selected(1)
         .align(Align::bot_center())
         .on_submit(|s, difficulty:&str| {
             s.pop_layer();
+            s.pop_layer();
+            // get_study_card(s, card);
+            // let msg = format!("You picked {difficulty} difficulty");
+            // // let next_card = get_study_card(siv, deck_name, first_card)
+            // s.add_layer(Dialog::new()
+            //             .content(TextView::new(msg)))
         });
     // select_view.align(Align::bot_center());
 
