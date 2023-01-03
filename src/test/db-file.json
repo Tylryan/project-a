@@ -2,52 +2,106 @@
   "decks": [
     {
       "name": "idk",
-      "review": [],
-      "unseen": [
+      "review": [
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "Normal",
+          "status": "Review",
+          "date_created": "2023-01-03T16:31:58.738760496-06:00",
+          "last_show_date": "2023-01-03T16:33:59.498592990-06:00",
+          "next_show_date": "2023-01-04T16:33:36.937610541-06:00",
+          "times_correct": 3
+        },
         {
           "front": "hi",
           "back": "there",
-          "difficulty": "None",
-          "status": "Unseen",
-          "date_created": "2023-01-01T18:14:11.190842347-06:00",
-          "last_show_date": "2023-01-01T18:14:11.190842347-06:00",
-          "next_show_date": "2023-01-01T18:15:11.190842347-06:00",
-          "times_correct": 0
+          "difficulty": "Normal",
+          "status": "Review",
+          "date_created": "2023-01-03T16:31:58.898054611-06:00",
+          "last_show_date": "2023-01-03T16:34:01.649649040-06:00",
+          "next_show_date": "2023-01-04T16:34:00.620281229-06:00",
+          "times_correct": 3
+        }
+      ],
+      "unseen": [],
+      "cards": [
+        {
+          "front": "hello",
+          "back": "there",
+          "difficulty": "Normal",
+          "status": "Review",
+          "date_created": "2023-01-03T16:31:58.738760496-06:00",
+          "last_show_date": "2023-01-03T16:33:59.498592990-06:00",
+          "next_show_date": "2023-01-04T16:33:36.937610541-06:00",
+          "times_correct": 3
         },
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "Normal",
+          "status": "Review",
+          "date_created": "2023-01-03T16:31:58.898054611-06:00",
+          "last_show_date": "2023-01-03T16:34:01.649649040-06:00",
+          "next_show_date": "2023-01-04T16:34:00.620281229-06:00",
+          "times_correct": 3
+        }
+      ],
+      "path": "./test/idk",
+      "unseen_count": 0,
+      "parent_deck": null,
+      "children_decks": null,
+      "max_daily_review": 5,
+      "max_daily_new": 5
+    },
+    {
+      "name": "something",
+      "review": [],
+      "unseen": [
         {
           "front": "hello",
           "back": "there",
           "difficulty": "None",
           "status": "Unseen",
-          "date_created": "2023-01-01T19:21:06.566823522-06:00",
-          "last_show_date": "2023-01-01T19:21:06.566823522-06:00",
-          "next_show_date": "2023-01-01T19:22:06.566823522-06:00",
+          "date_created": "2023-01-03T16:31:59.255142185-06:00",
+          "last_show_date": "2023-01-03T16:31:59.255142185-06:00",
+          "next_show_date": "2023-01-03T16:32:59.255142185-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-03T16:31:59.417460560-06:00",
+          "last_show_date": "2023-01-03T16:31:59.417460560-06:00",
+          "next_show_date": "2023-01-03T16:32:59.417460560-06:00",
           "times_correct": 0
         }
       ],
       "cards": [
         {
-          "front": "hi",
-          "back": "there",
-          "difficulty": "None",
-          "status": "Unseen",
-          "date_created": "2023-01-01T18:14:11.190842347-06:00",
-          "last_show_date": "2023-01-01T18:14:11.190842347-06:00",
-          "next_show_date": "2023-01-01T18:15:11.190842347-06:00",
-          "times_correct": 0
-        },
-        {
           "front": "hello",
           "back": "there",
           "difficulty": "None",
           "status": "Unseen",
-          "date_created": "2023-01-01T19:21:06.566823522-06:00",
-          "last_show_date": "2023-01-01T19:21:06.566823522-06:00",
-          "next_show_date": "2023-01-01T19:22:06.566823522-06:00",
+          "date_created": "2023-01-03T16:31:59.255142185-06:00",
+          "last_show_date": "2023-01-03T16:31:59.255142185-06:00",
+          "next_show_date": "2023-01-03T16:32:59.255142185-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "hi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-03T16:31:59.417460560-06:00",
+          "last_show_date": "2023-01-03T16:31:59.417460560-06:00",
+          "next_show_date": "2023-01-03T16:32:59.417460560-06:00",
           "times_correct": 0
         }
       ],
-      "path": "./test/idk",
+      "path": "./test/something",
       "unseen_count": 2,
       "parent_deck": null,
       "children_decks": null,
@@ -55,5 +109,5 @@
       "max_daily_new": 5
     }
   ],
-  "count": 1
+  "count": 0
 }

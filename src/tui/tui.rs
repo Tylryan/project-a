@@ -1,7 +1,10 @@
 use std::borrow::BorrowMut;
 use std::cell::RefCell;
+use std::fs::write;
+use std::process::exit;
 use std::rc::Rc;
 
+use chrono::{Local, Duration};
 use cursive::align::Align;
 use cursive::event::{Key, EventResult, Callback};
 use cursive::theme::{Style, Effect};
@@ -13,13 +16,12 @@ use cursive::event;
 type StudyCard = ResizedView<ResizedView<Panel<LinearLayout>>>;
 
 
-use crate::common::card::Card;
+use crate::common::card::{Card, CardStatus, Difficulty};
 use crate::common::deck::Deck;
 use crate::common::decks::Decks;
 use crate::common::study::ReviewSystem;
 use crate::storage::db_handler::DbHandler;
-// Grab decks from storage
-//
+
 
 pub struct App 
 {
@@ -28,9 +30,12 @@ pub struct App
     pub decks: Decks,
     pub db: DbHandler,
     pub review_system: Option<ReviewSystem>,
-    pub current_card: RefCell<Box<Option<Card>>>
+    // The should probably just come from review_system
+    pub current_card: Option<Card>,
+    pub current_deck: Option<Deck>,
     // Decks
 }
+// Create functions that pull from the review system and make life easier.
 
 impl App 
 {
@@ -39,82 +44,21 @@ impl App
         let db = DbHandler::new("./test");
 
         Self {
-            mode: Mode::Normal,
-            screen: Screen::Home,
-            decks: db.get_decks(),
-            db: DbHandler::new("./test"),
+            mode:          Mode::Normal,
+            screen:        Screen::Home,
+            decks:         db.get_decks(),
+            db:            DbHandler::new("./test"),
             review_system: None,
-            current_card: RefCell::new(Box::new(None))
+            current_card:  None,
+            current_deck:  None,
         }
     }
     pub fn run() {
         let mut siv = cursive::default();
         let app     = App::new();
+
         siv.set_user_data(app);
-
-        siv.add_global_callback('q', |s| s.quit());
-        siv.add_global_callback(Key::Backspace, |s| {
-            let screen = s.with_user_data(|app: &mut App| app.screen.to_owned()).unwrap();
-            let mode = s.with_user_data(|app: &mut App| app.mode.to_owned()).unwrap();
-            match screen 
-            {
-                Screen::Home => return,
-                Screen::Study =>{
-                    s.pop_layer().unwrap();
-                    s.pop_layer().unwrap();
-                    return;
-                },
-                _ => {
-                    s.pop_layer().unwrap();
-                    return;
-                }
-            }
-        });
-        siv.add_global_callback(event::Key::Esc, |s| {
-            let screen  = s.with_user_data(|app: &mut App |{return app.screen.to_owned();});
-            let mode = s.with_user_data(|app: &mut App| {
-                return app.mode.to_owned();
-            });
-            match screen.unwrap() 
-            {
-
-                Screen::Home => return,
-                _ => {}
-            }
-            match mode.unwrap()
-            {
-                Mode::Insert => {
-                    s.screen_mut().add_transparent_layer(DummyView);
-                    s.with_user_data(|app: &mut App| app.mode = Mode::Normal);
-                },
-                Mode::Normal => {}
-            }
-        });
-        siv.add_global_callback('i', |s| {
-            let screen  = s.with_user_data(|app: &mut App |{return app.screen.to_owned();});
-            let mode = s.with_user_data(|app: &mut App| {
-                return app.mode.to_owned();
-            });
-            match screen.unwrap() 
-            {
-
-                Screen::Home => return,
-                _ => {}
-            }
-            match mode.unwrap()
-            {
-                Mode::Normal => {
-                    s.pop_layer();
-                    s.with_user_data(|app: &mut App| app.mode = Mode::Insert);
-                },
-                Mode::Insert => {}
-            }
-        });
-
-        siv.add_global_callback('H', |s| {
-            s.pop_layer().unwrap();
-            home_page(s);
-        });
+        set_initial_callbacks(&mut siv);
 
         let home_page = home_page(&mut siv);
         siv.add_layer(home_page);
@@ -148,34 +92,29 @@ fn home_page(s: &mut Cursive) -> LinearLayout
     }
 
 
+    // Make these traits or something
     let bold = Style::from(Effect::Bold);
     let underline = Style::from(Effect::Underline);
     let bold_underline = Style::merge(&[bold,underline]);
     let decks = s.with_user_data(|app : &mut App| app.decks.list_decks()).unwrap();
     let deck_names = decks.iter().map(|d| d.get_name());
-    // let deck_names = vec!["hello","there", "bob", "how", "is", "today","treating","you", "today", "oh","you know"];
     let mut decks: SelectView<String> = SelectView::new()
         .align(Align::center_left())
-        // .set_on_submit(study_page);
         .on_submit(|s,deck_name: &str| { 
-            //TODO
             let deck: Deck = s.with_user_data(|app: &mut App| {
                 return app.decks.get_deck(&deck_name).unwrap();
             }).unwrap();
 
-            let storage = s.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
-            // {
-                let mut rs = ReviewSystem::new(&deck, &storage);
-                rs.generate_study_deck();
-                s.with_user_data(|app: &mut App| app.review_system = Some(rs));
-            // }
-            let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned());
+            s.with_user_data(|app: &mut App| app.current_deck = Some(deck.to_owned()));
+            let current_card = get_current_card(s, &deck);
 
-            let current_card = Rc::new(rs.unwrap().unwrap().get_current_card());
             match current_card.as_ref()
             {
                 Some(card) => {
+                    // Simple display the current card to the user
                     let study_page = get_study_card(s, card.to_owned());
+                    // TODO: Need to implement the study logic here in order to get next card?
+                    // s.with_user_data(|app: &mut App| app.review_system.unwrap().study_cards.pop()).unwrap();
                     s.add_layer(study_page);
                     s.screen_mut().add_transparent_layer(DummyView);
                 },
@@ -192,7 +131,6 @@ fn home_page(s: &mut Cursive) -> LinearLayout
                     s.add_layer(no_cards);
                 }
             }
-            // }
         });
 
     for value in deck_names
@@ -232,98 +170,260 @@ fn home_page(s: &mut Cursive) -> LinearLayout
     return home_page;
 }
 
-
-fn setup_session(siv: &mut Cursive,deck_name: String) 
-{
-    let deck: Deck = siv.with_user_data(|app: &mut App| {
-        return app.decks.get_deck(&deck_name).unwrap();
-    }).unwrap();
-
-    let storage = siv.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
-    let mut rs = ReviewSystem::new(&deck, &storage);
-    rs.generate_study_deck();
-}
-
 fn get_study_card(siv: &mut Cursive, card: Card) -> StudyCard
 {
     siv.with_user_data(| app: &mut App| app.screen = Screen::Study);
 
     let answer_box = EditView::new()
-        .on_submit(|s, answer| {
-            // s.pop_layer().unwrap();
-            let difficulty_screen = get_difficulty(s);
-            s.add_layer(difficulty_screen);
-        });
+        .on_submit(|s, answer: &str| {
+
+            let current_card = s.with_user_data(|app: &mut App| app.current_card.to_owned()).unwrap().unwrap();
+
+            // If answer is correct
+            if answer == current_card.get_back() 
+            {
+                let difficulty_window = get_difficulty(s);
+                s.add_layer(difficulty_window);
+
+                let mut new_card   = current_card.to_owned();
+                let times_correct  = new_card.get_times_correct() +1;
+                let mut multiplier = times_correct.clone() as i64;
+
+                // TODO: This 2 should be dynamic an come from a config file
+                if new_card.get_times_correct() >= 2
+                {
+                    multiplier         = (times_correct - 2) as i64;
+                    let next_show_date = new_card.get_last_show_date() + Duration::days(multiplier);
+                    new_card.set_next_show_date(next_show_date);
+                }
+                else 
+                {
+                    let next_show_date = Local::now() + (Duration::minutes(2));
+                    new_card.set_next_show_date(next_show_date);
+                }
+
+                // TODO: Get Difficulty from difficulty window
+
+                new_card.set_difficulty(Difficulty::Normal);
+                new_card.set_status(CardStatus::Review);
+                new_card.set_last_show_date(Local::now());
+                new_card.set_times_correct(times_correct);
+                new_card.set_status(CardStatus::Review);
+
+                let mut current_deck = s.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
+                let storage          = DbHandler::new("./test");
+                let mut decks        = s.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
+
+                current_deck.update_card(&new_card).unwrap();
+                current_deck.set_review();
+                current_deck.set_unseen();
+
+                decks.update_deck(&current_deck);
+                storage.save(&decks);
+
+
+                s.with_user_data(|app: &mut App| app.current_deck = Some(current_deck));
+                // s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test"));
+                s.with_user_data(|app: &mut App| app.db = storage);
+                s.with_user_data(|app: &mut App| app.decks = decks);
+                s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
+            } 
+            // If answer is incorrect
+            else 
+            {
+                let mut new_card   = current_card.to_owned();
+                new_card.set_status(CardStatus::Review);
+                let next_show_date = Local::now() + Duration::minutes(1);
+                new_card.set_next_show_date(next_show_date);
+                new_card.set_last_show_date(Local::now());
+                new_card.set_times_correct(0);
+                new_card.set_difficulty(Difficulty::Wrong);
+
+                let mut current_deck = s.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
+                let storage          = DbHandler::new("./test");
+                let mut decks        = s.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
+
+                current_deck.update_card(&new_card).unwrap();
+                current_deck.set_review();
+                current_deck.set_unseen();
+
+                decks.update_deck(&current_deck);
+                storage.save(&decks);
+
+
+                s.with_user_data(|app: &mut App| app.current_card = Some(new_card));
+                s.with_user_data(|app: &mut App| app.current_deck = Some(current_deck));
+                s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test"));
+                s.with_user_data(|app: &mut App| app.decks = decks);
+                s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
+
+            }
+
+            s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
+            let current_deck = s.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
+            let next_card = get_current_card(s, &current_deck);
+            s.call_on_name("question", |view: &mut TextView| {
+                view.set_content(next_card.to_owned().unwrap().get_front());
+            });
+            s.call_on_name("answer", |view: &mut EditView| {
+                view.set_content("");
+            });
+        })
+        .with_name("answer") ;
+
     let back_door = Dialog::new()
                            .content(answer_box)
                            .padding_top(1)
                            .min_height(5);
 
     let front_door = Dialog::new()
-                    .content(TextView::new(card.get_front()).align(Align::center()))
+                    .content(
+                        TextView::new(card.get_front())
+                        .align(Align::center())
+                        .with_name("question"))
                     .min_height(5);
 
     let study_card = Panel::new(LinearLayout::vertical()
             .child(DummyView)
-            .child(TextView::new("Front")
-                   .h_align(cursive::align::HAlign::Center)
-                   )
             .child(front_door)
             .child(DummyView)
-            .child(TextView::new("Back")
-                   .h_align(cursive::align::HAlign::Center)
-                   )
             .child(back_door)
-
             )
             .title("Study")
             .min_width(50)
-            .min_height(20);
+            .min_height(15);
     return study_card;
 }
 
 fn get_difficulty(s: &mut Cursive) -> StudyCard
 {
     s.with_user_data(|app: &mut App| {app.screen = Screen::Difficulty});
-    let select_view = SelectView::new() 
+    let select_view= SelectView::new() 
         .item_str("Easy")
         .item_str("Ok")
         .item_str("Hard")
         .selected(1)
         .align(Align::bot_center())
         .on_submit(|s, difficulty:&str| {
+            let difficulty = match difficulty 
+            {
+                "Easy" => Difficulty::Easy,
+                "Ok"   => Difficulty::Normal,
+                "Hard" => Difficulty::Hard,
+                _      => Difficulty::Normal,
+            };
+
             s.pop_layer();
-            s.pop_layer();
-            // get_study_card(s, card);
-            // let msg = format!("You picked {difficulty} difficulty");
-            // // let next_card = get_study_card(siv, deck_name, first_card)
-            // s.add_layer(Dialog::new()
-            //             .content(TextView::new(msg)))
-        });
-    // select_view.align(Align::bot_center());
+        })
+        .with_name("difficulty");
 
     let select_view = OnEventView::new(select_view)
         .on_pre_event_inner('k', |d,_| 
                             {
-                                let cb = d.select_up(1);
+                                let cb = d.get_mut().select_up(1);
                                 Some(EventResult::Consumed(Some(cb)))
                             })
         .on_pre_event_inner('j', |d,_|
                             {
-                                let cb = d.select_down(1);
+                                let cb = d.get_mut().select_down(1);
                                 Some(EventResult::Consumed(Some(cb)))
-                            });
+                            }) ;
 
     let select_view = LinearLayout::vertical()
         .child(TextView::new("Difficulty")
                .align(Align::bot_center()))
         .child(DummyView)
-        .child(select_view);
+        .child(select_view) ;
 
     let difficulty_screen = Panel::new(select_view)
         .min_width(30)
         .max_height(20) ;
 
     return difficulty_screen;
+
+}
+
+
+fn get_current_card(s: &mut Cursive, deck: &Deck) -> Option<Card>
+{
+
+    s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test")).unwrap();
+    let mut storage = s.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
+    storage.sync_decks();
+    let mut rs = ReviewSystem::new(&deck, &storage);
+
+    rs.generate_study_deck();
+    s.with_user_data(|app: &mut App| app.review_system = Some(rs.to_owned()));
+    let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned()).unwrap();
+
+    let current_card = rs.unwrap().get_current_card();
+    s.with_user_data(|app: &mut App| {app.current_card = current_card.to_owned();});
+    return current_card;
+}
+
+fn set_initial_callbacks(siv: &mut Cursive) 
+{
+    siv.add_global_callback('q', |s| s.quit());
+    siv.add_global_callback(Key::Backspace, |s| {
+        let screen = s.with_user_data(|app: &mut App| app.screen.to_owned()).unwrap();
+        match screen 
+        {
+            Screen::Home => return,
+            Screen::Study =>{
+                s.pop_layer().unwrap();
+                s.pop_layer().unwrap();
+                return;
+            },
+            _ => {
+                s.pop_layer().unwrap();
+                return;
+            }
+        }
+    });
+    siv.add_global_callback(event::Key::Esc, |s| {
+        let screen  = s.with_user_data(|app: &mut App |{return app.screen.to_owned();});
+        let mode = s.with_user_data(|app: &mut App| {
+            return app.mode.to_owned();
+        });
+        match screen.unwrap() 
+        {
+
+            Screen::Home => return,
+            _ => {}
+        }
+        match mode.unwrap()
+        {
+            Mode::Insert => {
+                s.screen_mut().add_transparent_layer(DummyView);
+                s.with_user_data(|app: &mut App| app.mode = Mode::Normal);
+            },
+            Mode::Normal => {}
+        }
+    });
+    siv.add_global_callback('i', |s| {
+        let screen  = s.with_user_data(|app: &mut App |{return app.screen.to_owned();});
+        let mode = s.with_user_data(|app: &mut App| {
+            return app.mode.to_owned();
+        });
+        match screen.unwrap() 
+        {
+
+            Screen::Home => return,
+            _ => {}
+        }
+        match mode.unwrap()
+        {
+            Mode::Normal => {
+                s.pop_layer();
+                s.with_user_data(|app: &mut App| app.mode = Mode::Insert);
+            },
+            Mode::Insert => {}
+        }
+    });
+
+    siv.add_global_callback('H', |s| {
+        s.pop_layer().unwrap();
+        home_page(s);
+    });
 
 }

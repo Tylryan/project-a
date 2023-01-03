@@ -39,11 +39,11 @@ pub enum Message
 #[derive(Debug, Clone)]
 pub struct ReviewSystem
 {
-    deck: Deck,
-    decks: Decks,
+    pub deck: Deck,
+    pub decks: Decks,
     pub study_cards: Vec<Card>,
     pub current_card: Option<Card>,
-    storage: DbHandler,
+    pub storage: DbHandler,
     pub cards_reviewed: usize,
 }
 
@@ -69,14 +69,7 @@ impl ReviewSystem
     }
     pub fn study_cli(&mut self)
     {
-        // Get the deck
-        // ---- Normally wouldn't do this way
-        // let deck: Deck   = self.storage.get_decks()
-        //     .get_deck(&self.deck.get_name())
-        //     .unwrap();
         self.storage.sync_decks();
-        // let rs = Self::new(&deck, &storage);
-        // ------------------
         match self.study() 
         {
             Message::QuitNoMessage => return,
@@ -120,16 +113,13 @@ impl ReviewSystem
     {
             println!("CORRECT!");
 
-            // rs.mark_correct(&current_card.as_ref().unwrap());
             let mut new_card   = current_card.to_owned();
             new_card.set_status(CardStatus::Review);
             new_card.set_last_show_date(Local::now());
             let times_correct = new_card.get_times_correct() + 1;
             new_card.set_times_correct(times_correct);
             let mut multiplier = times_correct.clone() as i64;
-            println!("Next Show: {}", new_card.get_next_show_date());
-            println!("Times correct: {}", new_card.get_times_correct());
-            print!("Difficulty from 1-3?: ");
+            print!("Difficulty from 1-3? (Default 2): ");
             std::io::stdout().flush().unwrap();
             match Self::input().parse().unwrap()
             {
@@ -146,10 +136,10 @@ impl ReviewSystem
                 _ => { new_card.set_difficulty(Difficulty::Normal); }
             };
             println!("Multiplier: {multiplier}");
-            if new_card.get_times_correct() > 3 
+            if new_card.get_times_correct() > 2
             {
                 // For the sake of readability
-                multiplier = (times_correct - 3) as i64;
+                multiplier = (times_correct - 2) as i64;
                 println!("Multiplier {multiplier}");
                 let next_show_date = new_card.get_last_show_date() + ( Duration::days(multiplier));
                 new_card.set_next_show_date(next_show_date);
