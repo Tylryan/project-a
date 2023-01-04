@@ -1,13 +1,21 @@
 #!/usr/bin/bash
 
 
-cargo r remove deck idk
-cargo r remove deck something
 
-cargo r add deck idk
-cargo r add card hello::there idk
-cargo r add card hi::there idk
+rm -rf ./test/*
+cargo r add deck russian
+cargo r add deck russian-verbs
+cargo r add deck russian-nouns
+cargo r add deck russian-phrases
 
-cargo r add deck something
-cargo r add card hello::there something
-cargo r add card hi::there something
+cargo r add card hello::there russian
+cargo r add card hi::there russian
+
+cargo r add card hello::there russian-verbs
+cargo r add card hi::there russian-verbs
+
+cargo r add card hello::there russian-nouns
+cargo r add card hi::there russian-nouns
+
+cargo r add card hello::there russian-phrases
+cargo r add card hi::there russian-phrases

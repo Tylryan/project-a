@@ -2,10 +2,10 @@ use std::path::PathBuf;
 
 use serde::{Serialize, Deserialize};
 
-use crate::common::card::Card;
-use crate::user::deck_handler::DeckHandler;
-
-use super::card::CardStatus;
+use crate::{
+    common::card::{Card, CardStatus},
+    user::deck_handler::DeckHandler,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Deck 

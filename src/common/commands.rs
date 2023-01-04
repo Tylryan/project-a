@@ -1,8 +1,10 @@
 use std::path::PathBuf;
 
-use crate::storage::db_handler::DbHandler;
-use crate::user::deck_handler::DeckHandler;
-use crate::common;
+use crate::{
+    common::{self, traits::*}      ,
+    storage::db_handler::DbHandler ,
+    user::deck_handler::DeckHandler,
+};
 
 pub struct Commands { }
 
@@ -11,8 +13,7 @@ impl Commands
     pub fn add_deck(deck_name: String)    
     { 
         let config_path = "./test";
-        let deck_path   = format!("{config_path}/decks/{deck_name}.deck");
-        let deck_buffer = PathBuf::from(format!("{deck_path}"));
+        let deck_buffer = format!("{config_path}/decks/{deck_name}.deck").to_pathbuf();
         let new_deck    = common::deck::Deck::new(&deck_buffer);
 
         DeckHandler::add_deck(&new_deck, config_path);
@@ -33,8 +34,8 @@ impl Commands
                       deck_names[2], subdeck_limit);
         }
 
-        let deck_one_path = PathBuf::from(
-            format!("{config_dir}/decks/{}.deck", deck_names[0]));
+        let deck_one_path = format!("{config_dir}/decks/{}.deck", 
+                                    deck_names[0]).to_pathbuf();
         let mut deck_two_path = PathBuf::new();
 
         if deck_names.len() == 2 

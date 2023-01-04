@@ -1,7 +1,7 @@
 use std::{path::PathBuf, io::ErrorKind, process::exit};
 
 use crate::{
-    common::{ decks::Decks, deck::Deck, card::Card }, 
+    common::{ decks::Decks, deck::Deck, card::Card, traits::*}, 
     user::deck_handler::DeckHandler
 };
 #[derive(Debug, Clone)]
@@ -23,7 +23,7 @@ impl DbHandler
             DbHandler::new_db_file(&db_file);
         }
 
-        let db_file_path = PathBuf::from(format!("{config_path}/db-file.json"));
+        let db_file_path = format!("{config_path}/db-file.json").to_pathbuf();
         let decks        = DbHandler::read(config_path);
 
         Self { decks, db_file_path, config_path: config_path.into() }
@@ -122,12 +122,12 @@ impl DbHandler
     pub fn read(config_path: &str) -> Decks
     { 
         let storage_path     = format!("{config_path}/db-file.json");
-        if !PathBuf::from(&storage_path).exists() 
+        if !PathBuf::from(&storage_path).to_path_buf().exists() 
         {
             DbHandler::new_db_file(&storage_path);
         }
 
-        let err_msg = format!("Error: `{storage_path}` does not exist!");
+        // let err_msg = format!("Error: `{storage_path}` does not exist!");
         let storage_contents = std::fs::read_to_string(storage_path)
             .expect("Error: `{storage_path}` does not exist!");
         let decks: Decks     = serde_json::from_str(&storage_contents).unwrap();
@@ -176,7 +176,9 @@ impl DbHandler
     // Pull from User's decks and update db
     pub fn add_deck(&self, deck: &Deck)
     {
-        let deck_buffer = PathBuf::from(format!("{}/{}",self.config_path, deck.get_name()));
+        let deck_buffer = format!("{}/{}",
+                                  self.config_path, 
+                                  deck.get_name()).to_pathbuf();
         let storage     = DbHandler::new(&self.config_path);
         let mut decks   = storage.get_decks();
 
@@ -192,7 +194,7 @@ impl DbHandler
 
     pub fn add_card(&mut self, card: &Card, deck_name: &str) 
     {
-        let deck_buffer = PathBuf::from(format!("{}/{}",self.config_path, deck_name));
+        let deck_buffer = format!("{}/{}",self.config_path, deck_name).to_pathbuf();
         let storage     = DbHandler::new(&self.config_path);
         let mut decks   = storage.get_decks();
 

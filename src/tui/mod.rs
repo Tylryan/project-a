@@ -1,4 +1,4 @@
-// pub mod card;
-// pub mod deck;
-// pub mod decks;
 pub mod tui;
+pub mod homepage;
+pub mod studycard;
+pub mod global_callbacks;

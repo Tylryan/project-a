@@ -1,32 +1,15 @@
-// - Grab X Unseen cards (new)
-// - Grab X Review cards (review)
-// - Combine both and sort by self.show_next
-
-// Get question wrong
-//     - self.times_correct = 0
-//         - reset times correct
-//     - self.next_show += Duration::minutes(1);
-//         - Show again in 1 minute
-//     - self.status = CardStatus::Review
-// Get question right
-//     - if >= 3 times in a row; 
-//         - self.next_show += Duration::day(self.times_correct - 2);
-//     - else
-//         - self.next_show += Duration::minutes(self.times_correct);
-//     - self.times_correct +=1
-//     - if self.show_next - today > 1 month;
-//         - self.status = CardStatus::Mature
-
 use std::{io::Write, process::exit};
 
 use chrono::{Duration, Local};
 
 // This might not be useful to do it this way
 use crate::{common::{
-    deck::Deck,
-    card::{Card, Difficulty, CardStatus},
-    decks::Decks,
-}, storage::db_handler::DbHandler};
+        deck::Deck,
+        card::{Card, Difficulty, CardStatus},
+        decks::Decks,
+    }, 
+    storage::db_handler::DbHandler
+};
 
 // Rename to something else
 pub enum Message 
