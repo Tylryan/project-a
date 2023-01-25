@@ -1,3 +1,5 @@
+use std::fs::write;
+
 use chrono::{Local, Duration};
 use cursive::{
     Cursive                                   ,
@@ -9,7 +11,8 @@ use cursive::{
         LinearLayout, Panel     , Dialog      , 
         EditView    , DummyView , TextView    ,
         ResizedView , SelectView, OnEventView ,
-    }, CursiveExt                                         ,
+    }, 
+    CursiveExt                                ,
 };
 
 use crate::{
@@ -112,37 +115,16 @@ pub fn submit_answer(s: &mut Cursive, answer: &str)
 
     } 
     // If answer is incorrect
-    else 
-    {
-        let mut new_card   = current_card.to_owned();
-        let next_show_date = Local::now() + Duration::minutes(1);
+    else { submit_incorrect_answer(s); }
 
-        new_card.set_status(CardStatus::Review);
-        new_card.set_next_show_date(next_show_date);
-        new_card.set_last_show_date(Local::now());
-        new_card.set_times_correct(0);
-        new_card.set_difficulty(Difficulty::Wrong);
-
-        let mut current_deck = s.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
-        let storage          = DbHandler::new("./test");
-        let mut decks        = s.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
-
-        current_deck.update_card(&new_card).unwrap();
-        current_deck.set_review();
-        current_deck.set_unseen();
-        decks.update_deck(&current_deck);
-        storage.save(&decks);
-
-        s.with_user_data(|app: &mut App| app.current_card = Some(new_card));
-        s.with_user_data(|app: &mut App| app.current_deck = Some(current_deck));
-        s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test"));
-        s.with_user_data(|app: &mut App| app.decks = decks);
-        s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
-
-    }
-
+    // Prep next card
     s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
     let current_deck = s.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
+    let study_cards = s.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().study_cards).unwrap();
+
+    // Wrong here
+    // does not increment to next card
+    // get_current_card does appear to work fine though
     let next_card    = get_current_card(s, &current_deck);
 
 
@@ -181,13 +163,17 @@ pub fn submit_correct_answer(siv: &mut Cursive, difficulty: &Difficulty)
         new_card.set_times_correct(times_correct);
         new_card.set_status(CardStatus::Review);
 
+        // Error
+        // Not updating DB
+        // let storage          = DbHandler::new("./test");
         let mut current_deck = siv.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
-        let storage          = DbHandler::new("./test");
-        let mut decks        = siv.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
+        let storage   = siv.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
+        let mut decks = siv.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
 
         current_deck.update_card(&new_card).unwrap();
+        // Updates the review cards in deck
         current_deck.set_review();
-        current_deck.set_unseen();
+        // current_deck.set_unseen();
 
         decks.update_deck(&current_deck);
         storage.save(&decks);
@@ -195,8 +181,10 @@ pub fn submit_correct_answer(siv: &mut Cursive, difficulty: &Difficulty)
 
         siv.with_user_data(|app: &mut App| app.current_deck = Some(current_deck.to_owned()));
         // s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test"));
-        siv.with_user_data(|app: &mut App| app.db = storage);
+        // siv.with_user_data(|app: &mut App| app.db = storage);
         siv.with_user_data(|app: &mut App| app.decks = decks);
+
+        // Not sure what this is doing
         siv.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
 
         let next_card = get_current_card(siv, &current_deck);
@@ -222,5 +210,35 @@ pub fn submit_correct_answer(siv: &mut Cursive, difficulty: &Difficulty)
 
             return;
         }
+
+}
+pub fn submit_incorrect_answer(siv: &mut Cursive) 
+{
+    let current_card = siv.with_user_data(|app: &mut App| app.current_card.to_owned()).unwrap().unwrap();
+    let mut new_card   = current_card.to_owned();
+    let next_show_date = Local::now() + Duration::minutes(1);
+
+    new_card.set_status(CardStatus::Review);
+    new_card.set_next_show_date(next_show_date);
+    new_card.set_last_show_date(Local::now());
+    new_card.set_times_correct(0);
+    new_card.set_difficulty(Difficulty::Wrong);
+
+    let mut current_deck = siv.with_user_data(|app: &mut App| app.current_deck.to_owned()).unwrap().unwrap();
+    let storage          = DbHandler::new("./test");
+    let mut decks        = siv.with_user_data(|app: &mut App| app.decks.to_owned()).unwrap();
+
+    current_deck.update_card(&new_card).unwrap();
+    // Updates review cards in deck
+    current_deck.set_review();
+    current_deck.set_unseen();
+    decks.update_deck(&current_deck);
+    storage.save(&decks);
+
+    siv.with_user_data(|app: &mut App| app.current_card = Some(new_card));
+    siv.with_user_data(|app: &mut App| app.current_deck = Some(current_deck));
+    // s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test"));
+    siv.with_user_data(|app: &mut App| app.decks = decks);
+    siv.with_user_data(|app: &mut App| app.review_system.to_owned().unwrap().generate_study_deck());
 
 }

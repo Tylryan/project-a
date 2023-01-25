@@ -1,4 +1,4 @@
-use std::{io::Write, process::exit};
+use std::{io::Write, process::exit, fs::write};
 
 use chrono::{Duration, Local};
 
@@ -44,6 +44,82 @@ impl ReviewSystem
         }
     }
 
+    // This works
+    pub fn get_current_card(&self) -> Option<Card>
+    {
+        if let Some(current_card) = self.study_cards.get(0) 
+        {
+            return Some(current_card.to_owned());
+        }
+
+        return None;
+    }
+
+    // This is correct
+    pub fn generate_study_deck(&mut self)
+    {
+        self.set_study_cards();
+        self.deck.sort();
+        let naive_today = Local::now().naive_local() + Duration::hours(6);
+        // let todays_cards: Vec<Card> = self.deck.get_cards().iter().filter(|c| c.get_next_show_date().naive_local() <= naive_today)
+        //     .map(|c| c.to_owned())
+        //     .collect();
+        let todays_cards: Vec<Card> = self.study_cards.iter().filter(|c| c.get_next_show_date().naive_local() <= naive_today)
+            .map(|c| c.to_owned())
+            .collect();
+        self.study_cards = todays_cards;
+    }
+
+    // This is correct
+    pub fn set_study_cards(&mut self) 
+    {
+        let max_new_cards    = self.deck.get_max_daily_new();
+        let max_review_cards = self.deck.get_max_daily_review();
+        self.study_cards     = self.get_review_cards(max_review_cards);
+        let new_cards        = self.get_new_cards(max_new_cards);
+
+        self.study_cards.extend(new_cards);
+    }
+
+    pub fn get_review_cards(&mut self, mut max_review_cards: usize) -> Vec<Card>
+    {
+        // self.deck.get_cards().sort_by_key(|c| c.get_next_show_date());
+        let review_cards = self.deck.get_review();
+
+        if review_cards.len() == 0 { max_review_cards = 0 }
+        else if max_review_cards >= review_cards.len() 
+        {
+            max_review_cards = review_cards.len();
+        }
+
+        let review_cards = review_cards[..max_review_cards].to_owned();
+
+        return review_cards;
+    }
+
+    // This is correct
+    pub fn get_new_cards(&mut self, mut max_new_cards: usize) -> Vec<Card>
+    {
+        let new_cards = self.deck.get_unseen();
+
+        if new_cards.len() == 0 { max_new_cards = 0 }
+        else if max_new_cards >= new_cards.len() 
+        {
+            max_new_cards = new_cards.len();
+        }
+        let new_cards = new_cards[..max_new_cards].to_owned();
+
+        return new_cards;
+    }
+
+    fn input() -> String
+    {
+        let mut buffer = String::new();
+        std::io::stdin().read_line(&mut buffer).unwrap();
+        std::io::stdout().flush().unwrap();
+
+        return buffer.trim().to_string();
+    }
     pub fn study_tui(&mut self) 
     {
         self.storage.sync_decks();
@@ -134,8 +210,8 @@ impl ReviewSystem
             }
 
             self.deck.update_card(&new_card).unwrap(); // Works
-            self.deck.set_review();
-            self.deck.set_unseen();
+            // self.deck.set_review();
+            // self.deck.set_unseen();
             self.decks.update_deck(&self.deck);             // Does works
             self.storage.save(&self.decks);
 
@@ -153,76 +229,9 @@ impl ReviewSystem
         new_card.set_difficulty(Difficulty::Wrong);
         // Regardless of current card status, set all the way back to review
         self.deck.update_card(&new_card).unwrap(); // Works
-        self.deck.set_review();
-        self.deck.set_unseen();
+        // self.deck.set_review();
+        // self.deck.set_unseen();
         self.decks.update_deck(&self.deck);             // Does works
         self.storage.save(&self.decks);
-    }
-    pub fn get_current_card(&self) -> Option<Card>
-    {
-        if let Some(current_card) = self.study_cards.get(0) 
-        {
-            return Some(current_card.to_owned());
-        }
-        return None;
-    }
-
-    pub fn generate_study_deck(&mut self)
-    {
-        self.set_study_cards();
-        self.deck.sort();
-        let naive_today = Local::now().naive_local() + Duration::hours(6);
-        let todays_cards: Vec<Card> = self.deck.get_cards().iter().filter(|c| c.get_next_show_date().naive_local() <= naive_today)
-            .map(|c| c.to_owned())
-            .collect();
-        self.study_cards = todays_cards;
-    }
-
-    pub fn set_study_cards(&mut self) 
-    {
-        let max_new_cards    = self.deck.get_max_daily_new() + 1;
-        let max_review_cards = self.deck.get_max_daily_review() +1;
-        self.study_cards     = self.get_review_cards(max_review_cards);
-        let new_cards        = self.get_new_cards(max_new_cards);
-
-        self.study_cards.extend(new_cards);
-    }
-
-    pub fn get_review_cards(&mut self, mut max_review_cards: usize) -> Vec<Card>
-    {
-        // self.deck.get_cards().sort_by_key(|c| c.get_next_show_date());
-        let review_cards = self.deck.get_review();
-
-        if review_cards.len() == 0 { max_review_cards = 0 }
-        else if max_review_cards >= review_cards.len() 
-        {
-            max_review_cards = review_cards.len();
-        }
-
-        let review_cards = review_cards[..max_review_cards].to_owned();
-
-        return review_cards;
-    }
-
-    pub fn get_new_cards(&mut self, mut max_new_cards: usize) -> Vec<Card>
-    {
-        let new_cards = self.deck.get_unseen();
-
-        if new_cards.len() == 0 { max_new_cards = 0 }
-        else if max_new_cards >= new_cards.len() 
-        {
-            max_new_cards = new_cards.len();
-        }
-        let new_cards = new_cards[..max_new_cards].to_owned();
-
-        return new_cards;
-    }
-    fn input() -> String
-    {
-        let mut buffer = String::new();
-        std::io::stdin().read_line(&mut buffer).unwrap();
-        std::io::stdout().flush().unwrap();
-
-        return buffer.trim().to_string();
     }
 }

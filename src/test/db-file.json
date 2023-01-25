@@ -1,220 +1,232 @@
 {
   "decks": [
     {
-      "name": "russian-nouns",
-      "review": [
-        {
-          "front": "hello",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.203112090-06:00",
-          "last_show_date": "2023-01-04T17:02:23.125888748-06:00",
-          "next_show_date": "2023-01-05T17:02:21.581423008-06:00",
-          "times_correct": 3
-        },
-        {
-          "front": "hi",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.369940785-06:00",
-          "last_show_date": "2023-01-04T17:02:24.584495967-06:00",
-          "next_show_date": "2023-01-05T17:02:22.340619508-06:00",
-          "times_correct": 3
-        }
-      ],
-      "unseen": [],
-      "cards": [
-        {
-          "front": "hello",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.203112090-06:00",
-          "last_show_date": "2023-01-04T17:02:23.125888748-06:00",
-          "next_show_date": "2023-01-05T17:02:21.581423008-06:00",
-          "times_correct": 3
-        },
-        {
-          "front": "hi",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.369940785-06:00",
-          "last_show_date": "2023-01-04T17:02:24.584495967-06:00",
-          "next_show_date": "2023-01-05T17:02:22.340619508-06:00",
-          "times_correct": 3
-        }
-      ],
-      "path": "./test/russian-nouns",
-      "unseen_count": 0,
-      "parent_deck": null,
-      "children_decks": null,
-      "max_daily_review": 5,
-      "max_daily_new": 5
-    },
-    {
-      "name": "russian-phrases",
-      "review": [
-        {
-          "front": "hi",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.692340244-06:00",
-          "last_show_date": "2023-01-04T17:04:09.870201575-06:00",
-          "next_show_date": "2023-01-05T17:04:08.344968271-06:00",
-          "times_correct": 3
-        },
-        {
-          "front": "hello",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.530774952-06:00",
-          "last_show_date": "2023-01-04T17:04:10.617561039-06:00",
-          "next_show_date": "2023-01-05T17:04:09.091232405-06:00",
-          "times_correct": 3
-        }
-      ],
-      "unseen": [],
-      "cards": [
-        {
-          "front": "hi",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.692340244-06:00",
-          "last_show_date": "2023-01-04T17:04:09.870201575-06:00",
-          "next_show_date": "2023-01-05T17:04:08.344968271-06:00",
-          "times_correct": 3
-        },
-        {
-          "front": "hello",
-          "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.530774952-06:00",
-          "last_show_date": "2023-01-04T17:04:10.617561039-06:00",
-          "next_show_date": "2023-01-05T17:04:09.091232405-06:00",
-          "times_correct": 3
-        }
-      ],
-      "path": "./test/russian-phrases",
-      "unseen_count": 0,
-      "parent_deck": null,
-      "children_decks": null,
-      "max_daily_review": 5,
-      "max_daily_new": 5
-    },
-    {
       "name": "russian-verbs",
-      "review": [
+      "review": [],
+      "unseen": [
         {
           "front": "hello",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.867832751-06:00",
-          "last_show_date": "2023-01-04T17:03:56.339443309-06:00",
-          "next_show_date": "2023-01-05T17:03:54.645129566-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.884210566-06:00",
+          "last_show_date": "2023-01-25T15:29:41.884210566-06:00",
+          "next_show_date": "2023-01-25T15:30:41.884210566-06:00",
+          "times_correct": 0
         },
         {
           "front": "hi",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.027058571-06:00",
-          "last_show_date": "2023-01-04T17:03:57.086742156-06:00",
-          "next_show_date": "2023-01-05T17:03:55.606328278-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:42.076457040-06:00",
+          "last_show_date": "2023-01-25T15:29:42.076457040-06:00",
+          "next_show_date": "2023-01-25T15:30:42.076457040-06:00",
+          "times_correct": 0
         }
       ],
-      "unseen": [],
       "cards": [
         {
           "front": "hello",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.867832751-06:00",
-          "last_show_date": "2023-01-04T17:03:56.339443309-06:00",
-          "next_show_date": "2023-01-05T17:03:54.645129566-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.884210566-06:00",
+          "last_show_date": "2023-01-25T15:29:41.884210566-06:00",
+          "next_show_date": "2023-01-25T15:30:41.884210566-06:00",
+          "times_correct": 0
         },
         {
           "front": "hi",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:44.027058571-06:00",
-          "last_show_date": "2023-01-04T17:03:57.086742156-06:00",
-          "next_show_date": "2023-01-05T17:03:55.606328278-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:42.076457040-06:00",
+          "last_show_date": "2023-01-25T15:29:42.076457040-06:00",
+          "next_show_date": "2023-01-25T15:30:42.076457040-06:00",
+          "times_correct": 0
         }
       ],
       "path": "./test/russian-verbs",
-      "unseen_count": 0,
+      "unseen_count": 2,
       "parent_deck": null,
       "children_decks": null,
-      "max_daily_review": 5,
-      "max_daily_new": 5
+      "max_daily_review": 2,
+      "max_daily_new": 2
     },
     {
       "name": "russian",
-      "review": [
+      "review": [],
+      "unseen": [
+        {
+          "front": "hi",
+          "back": "привет",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.466456429-06:00",
+          "last_show_date": "2023-01-25T15:29:40.466456429-06:00",
+          "next_show_date": "2023-01-25T15:30:40.466456429-06:00",
+          "times_correct": 0
+        },
         {
           "front": "hello",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.532776804-06:00",
-          "last_show_date": "2023-01-04T17:00:44.522186252-06:00",
-          "next_show_date": "2023-01-05T17:00:43.026200059-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.645249049-06:00",
+          "last_show_date": "2023-01-25T15:29:40.645249049-06:00",
+          "next_show_date": "2023-01-25T15:30:40.645249049-06:00",
+          "times_correct": 0
         },
         {
-          "front": "hi",
+          "front": "vi",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.689997419-06:00",
-          "last_show_date": "2023-01-04T17:00:45.360005438-06:00",
-          "next_show_date": "2023-01-05T17:00:43.773107331-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.816401505-06:00",
+          "last_show_date": "2023-01-25T15:29:40.816401505-06:00",
+          "next_show_date": "2023-01-25T15:30:40.816401505-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "zi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.993199201-06:00",
+          "last_show_date": "2023-01-25T15:29:40.993199201-06:00",
+          "next_show_date": "2023-01-25T15:30:40.993199201-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "sky",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.173405262-06:00",
+          "last_show_date": "2023-01-25T15:29:41.173405262-06:00",
+          "next_show_date": "2023-01-25T15:30:41.173405262-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "lie",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.348485655-06:00",
+          "last_show_date": "2023-01-25T15:29:41.348485655-06:00",
+          "next_show_date": "2023-01-25T15:30:41.348485655-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "tie",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.527951945-06:00",
+          "last_show_date": "2023-01-25T15:29:41.527951945-06:00",
+          "next_show_date": "2023-01-25T15:30:41.527951945-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "rye",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.698708514-06:00",
+          "last_show_date": "2023-01-25T15:29:41.698708514-06:00",
+          "next_show_date": "2023-01-25T15:30:41.698708514-06:00",
+          "times_correct": 0
         }
       ],
-      "unseen": [],
       "cards": [
+        {
+          "front": "hi",
+          "back": "привет",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.466456429-06:00",
+          "last_show_date": "2023-01-25T15:29:40.466456429-06:00",
+          "next_show_date": "2023-01-25T15:30:40.466456429-06:00",
+          "times_correct": 0
+        },
         {
           "front": "hello",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.532776804-06:00",
-          "last_show_date": "2023-01-04T17:00:44.522186252-06:00",
-          "next_show_date": "2023-01-05T17:00:43.026200059-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.645249049-06:00",
+          "last_show_date": "2023-01-25T15:29:40.645249049-06:00",
+          "next_show_date": "2023-01-25T15:30:40.645249049-06:00",
+          "times_correct": 0
         },
         {
-          "front": "hi",
+          "front": "vi",
           "back": "there",
-          "difficulty": "Normal",
-          "status": "Review",
-          "date_created": "2023-01-04T16:59:43.689997419-06:00",
-          "last_show_date": "2023-01-04T17:00:45.360005438-06:00",
-          "next_show_date": "2023-01-05T17:00:43.773107331-06:00",
-          "times_correct": 3
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.816401505-06:00",
+          "last_show_date": "2023-01-25T15:29:40.816401505-06:00",
+          "next_show_date": "2023-01-25T15:30:40.816401505-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "zi",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:40.993199201-06:00",
+          "last_show_date": "2023-01-25T15:29:40.993199201-06:00",
+          "next_show_date": "2023-01-25T15:30:40.993199201-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "sky",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.173405262-06:00",
+          "last_show_date": "2023-01-25T15:29:41.173405262-06:00",
+          "next_show_date": "2023-01-25T15:30:41.173405262-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "lie",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.348485655-06:00",
+          "last_show_date": "2023-01-25T15:29:41.348485655-06:00",
+          "next_show_date": "2023-01-25T15:30:41.348485655-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "tie",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.527951945-06:00",
+          "last_show_date": "2023-01-25T15:29:41.527951945-06:00",
+          "next_show_date": "2023-01-25T15:30:41.527951945-06:00",
+          "times_correct": 0
+        },
+        {
+          "front": "rye",
+          "back": "there",
+          "difficulty": "None",
+          "status": "Unseen",
+          "date_created": "2023-01-25T15:29:41.698708514-06:00",
+          "last_show_date": "2023-01-25T15:29:41.698708514-06:00",
+          "next_show_date": "2023-01-25T15:30:41.698708514-06:00",
+          "times_correct": 0
         }
       ],
       "path": "./test/russian",
-      "unseen_count": 0,
+      "unseen_count": 8,
       "parent_deck": null,
       "children_decks": null,
-      "max_daily_review": 5,
-      "max_daily_new": 5
+      "max_daily_review": 2,
+      "max_daily_new": 2
     }
   ],
   "count": 0

@@ -48,6 +48,11 @@ pub fn home_page(s: &mut Cursive) -> LinearLayout
             let deck: Deck = s.with_user_data(|app: &mut App| { return app.decks.get_deck(&deck_name).unwrap(); }).unwrap();
 
             s.with_user_data(|app: &mut App| app.current_deck = Some(deck.to_owned()));
+            let storage = s.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
+            let mut rs = ReviewSystem::new(&deck, &storage);
+            rs.generate_study_deck();
+            s.with_user_data(|app: &mut App| app.review_system = Some(rs.to_owned()));
+            // let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned()).unwrap();
             let current_card = get_current_card(s, &deck);
 
             match current_card.as_ref()
@@ -119,13 +124,14 @@ pub fn home_page(s: &mut Cursive) -> LinearLayout
 
 pub fn get_current_card(s: &mut Cursive, deck: &Deck) -> Option<Card>
 {
-    s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test")).unwrap();
+    // s.with_user_data(|app: &mut App| app.db = DbHandler::new("./test")).unwrap();
     let mut storage = s.with_user_data(|app: &mut App| app.db.to_owned()).unwrap();
     storage.sync_decks();
-    let mut rs = ReviewSystem::new(&deck, &storage);
+    // let mut rs = ReviewSystem::new(&deck, &storage);
 
-    rs.generate_study_deck();
-    s.with_user_data(|app: &mut App| app.review_system = Some(rs.to_owned()));
+    // rs.generate_study_deck();
+    // s.with_user_data(|app: &mut App| app.review_system = Some(rs.to_owned()));
+    // let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned()).unwrap();
     let rs = s.with_user_data(|app: &mut App| app.review_system.to_owned()).unwrap();
 
     let current_card = rs.unwrap().get_current_card();

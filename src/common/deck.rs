@@ -49,8 +49,8 @@ impl Deck
             parent_deck:      None      ,
             children_decks:   None      ,
             unseen_count:     0         ,
-            max_daily_review: 5         ,
-            max_daily_new:    5         ,
+            max_daily_review: 2         ,
+            max_daily_new:    2         ,
         }
     }
 
@@ -59,35 +59,12 @@ impl Deck
         self.set_review();
         self.review.to_owned() 
     }
-
-    pub fn sort(&mut self) 
-    {
-        self.cards.sort_by_key(|c| c.get_next_show_date());
-    }
-
-    pub fn get_max_daily_review(&self) -> usize { self.max_daily_review }
-    pub fn set_max_daily_review(&mut self, max_daily_review: usize) 
-    {
-        self.max_daily_review = max_daily_review;
-    }
-    pub fn get_max_daily_new(&self) -> usize { self.max_daily_new }
-    pub fn set_max_daily_new(&mut self, max_daily_review: usize) 
-    {
-        self.max_daily_new = max_daily_review;
-    }
-
     pub fn set_review(&mut self)
     {
         self.review = self.cards.iter().filter(|c| c.get_status() == CardStatus::Review)
             .map(|c| c.to_owned())
             .collect();
     }
-
-    pub fn review_push(&mut self, card: &Card) 
-    {
-        self.review.push(card.to_owned());
-    }
-
     pub fn get_unseen(&mut self) -> Vec<Card> { 
         self.set_unseen();
         self.unseen.to_owned() 
@@ -102,6 +79,29 @@ impl Deck
         self.unseen = unseen_list.to_owned();
         self.unseen_count = unseen_list.len();
     }
+
+    pub fn sort(&mut self) 
+    {
+        self.cards.sort_by_key(|c| c.get_next_show_date());
+    }
+
+    pub fn get_max_daily_review(&self) -> usize { self.max_daily_review }
+    pub fn set_max_daily_review(&mut self, max_daily_review: usize) 
+    {
+        self.max_daily_review = max_daily_review;
+    }
+    pub fn get_max_daily_new(&self) -> usize { self.max_daily_new }
+    pub fn set_max_daily_new(&mut self, max_daily_new: usize) 
+    {
+        self.max_daily_new = max_daily_new;
+    }
+
+
+    pub fn review_push(&mut self, card: &Card) 
+    {
+        self.review.push(card.to_owned());
+    }
+
 
     pub fn update_card(&mut self, new_card: &Card) -> Result<(), String>
     {

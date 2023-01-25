@@ -1,5 +1,5 @@
-use cursive::
-    views::{LinearLayout, Panel, ResizedView};
+use cursive::{
+    views::{LinearLayout, Panel, ResizedView}, Cursive};
 
 use crate::{
     storage::db_handler::DbHandler,
@@ -64,6 +64,7 @@ impl App
     pub fn run() {
         let mut siv = cursive::default();
         let app     = App::new();
+        // set_theme(&mut siv);
 
         siv.set_user_data(app);
         set_initial_callbacks(&mut siv);
@@ -73,4 +74,36 @@ impl App
 
         siv.run();
     }
+}
+
+fn set_theme(siv: &mut Cursive) 
+{
+    let mut palette = cursive::theme::Palette::default();
+    // Eventually this will go in a config that the user can change
+    use cursive::theme::PaletteColor::*;
+    use cursive::theme::Color;
+    let dark_black  = Color::parse("dark black").unwrap();
+    let light_green = Color::parse("light green").unwrap();
+    let dark_white  = Color::parse("dark white").unwrap();
+    let cyan        = Color::parse("dark cyan").unwrap();
+    let none        = Color::TerminalDefault;
+    palette[Background]        = none;
+    palette[Shadow]            = none;
+    palette[View]              = none;
+    palette[Primary]           = none;
+    palette[Secondary]         = none;
+    palette[Tertiary]          = none;
+    palette[TitlePrimary]      = none;
+    palette[TitleSecondary]    = none;
+    palette[Highlight]         = none;
+    palette[HighlightInactive] = none;
+    palette[HighlightText]     = cyan;
+
+    let theme = cursive::theme::Theme{
+        palette,
+        shadow: true,
+        borders: cursive::theme::BorderStyle::Simple,
+    };
+    siv.set_theme(theme);
+
 }
